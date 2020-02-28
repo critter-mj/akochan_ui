@@ -1,0 +1,174 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>akochan_ui</title>
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="js/board.js"></script>
+    <script type="text/javascript">
+        async function show_log(view_pid, can_click) {
+            let log_json = await eel.get_log(view_pid)();
+            var table_str = '<table id="log_table" class="log_table">\n';
+            for (let i = 0; i < log_json.length; i++) {
+                table_str += '<tr><td class="log_num">' + String(i) + '</td><td class="log_action">';
+                if (can_click) {
+                    table_str += '<a href="#" onclick="log_pos_selected(' + String(i) + ')">' + JSON.stringify(log_json[i]) + '</a>';
+                } else {
+                    table_str += JSON.stringify(log_json[i]);
+                }
+                table_str += '</td></tr>\n'; 
+            }
+            table_str += '</table>\n';
+            document.getElementById("log_table_container").innerHTML = table_str;
+        }
+
+        async function unhighlight_log_pos() {
+            let log_pos = await eel.get_log_pos()();
+            var cell = document.getElementById("log_table").rows[log_pos].cells[1];
+            cell.outerHTML = cell.outerHTML.replace('log_selected_action', 'log_action');
+        }
+
+        function highlight_log_pos(pos) {
+            var cell = document.getElementById("log_table").rows[pos].cells[1];
+            cell.outerHTML = cell.outerHTML.replace('log_action', 'log_selected_action');
+        }
+
+        function update_board(state_json, view_pid) {
+            if (document.getElementById("board").innerHTML == "") {
+                document.getElementById("board").innerHTML = dump_board(state_json, view_pid);
+            } else {
+                board_new = dump_board(state_json, view_pid);
+                var doc_new = new DOMParser().parseFromString(board_new, "text/html");
+
+                let tehais_old = document.getElementsByClassName("tehai-container pai-row");
+                let tehais_new = doc_new.getElementsByClassName("tehai-container pai-row");
+                for (var i = 0; i < tehais_old.length; i++) {
+                    for (var j = 0; j < tehais_old[i].children.length; j++) {
+                        if (tehais_old[i].children[j].outerHTML != tehais_new[i].children[j].outerHTML) {
+                            tehais_old[i].children[j].outerHTML = tehais_new[i].children[j].outerHTML;
+                        }
+                    }
+                }
+
+                let kawas_old = document.getElementsByClassName("repeated pai-row");
+                let kawas_new = doc_new.getElementsByClassName("repeated pai-row");
+                for (var i = 0; i < kawas_old.length; i++) {
+                    for (var j = 0; j < kawas_old[i].children.length; j++) {
+                        if (kawas_old[i].children[j].outerHTML != kawas_new[i].children[j].outerHTML) {
+                            kawas_old[i].children[j].outerHTML = kawas_new[i].children[j].outerHTML;
+                        }
+                    }
+                }
+
+                let furos_old = document.getElementsByClassName("furo-container pai-row");
+                let furos_new = doc_new.getElementsByClassName("furo-container pai-row");
+                for (var i = 0; i < furos_old.length; i++) {
+                    if (furos_old[i].innerHTML != furos_new[i].innerHTML) {
+                        furos_old[i].innerHTML = furos_new[i].innerHTML;
+                    }
+                }
+
+                let player_info_old = document.getElementsByClassName("player-info-container");
+                let player_info_new = doc_new.getElementsByClassName("player-info-container");
+                for (var i = 0; i < player_info_old.length; i++) {
+                    if (player_info_old[i].innerHTML != player_info_new[i].innerHTML) {
+                        player_info_old[i].innerHTML = player_info_new[i].innerHTML;
+                    }
+                }
+
+                let kyoku_info_old = document.getElementsByClassName("kyoku-info-container")[0];
+                let kyoku_info_new = doc_new.getElementsByClassName("kyoku-info-container")[0];
+                if (kyoku_info_old.innerHTML != kyoku_info_new.innerHTML) {
+                    kyoku_info_old.innerHTML = kyoku_info_new.innerHTML;
+                }
+
+                let wanpai_old = document.getElementsByClassName("wanpais-container")[0];
+                let wanpai_new = doc_new.getElementsByClassName("wanpais-container")[0];
+                for (var i = 0; i < wanpai_old.children.length; i++) {
+                    if (wanpai_old.children[i].outerHTML != wanpai_new.children[i].outerHTML) {
+                        wanpai_old.children[i].outerHTML = wanpai_new.children[i].outerHTML;
+                    }
+                }
+
+                if (wanpai_old.innerHTML != wanpai_new.innerHTML) {
+                    wanpai_old.innerHTML = wanpai_new.innerHTML;
+                }
+
+                let num_info_old = document.getElementsByClassName("num_info-container")[0];
+                let num_info_new = doc_new.getElementsByClassName("num_info-container")[0];
+                for (var i = 0; i < num_info_old.children.length; i++) {
+                    if (num_info_old.children[i].outerHTML != num_info_new.children[i].outerHTML) {
+                        num_info_old.children[i].outerHTML = num_info_new.children[i].outerHTML;
+                    }
+                }
+            }
+        }
+
+        async function open_file_name(file_name) {
+            let file_open_err = await eel.open_file_name(file_name)();
+            if (file_open_err == 0) {
+                show_log(-1, true);
+                reset_button_ui_log();
+            }
+        }
+
+        function open_file() {
+            // open_file自体をasyncにすると動かないかもしれないので、async部分はopen_file_nameとして分離
+            var input = document.createElement('input');
+            input.type = 'file';
+
+            input.onchange = e => { 
+                var file = e.target.files[0];
+                open_file_name(file.name);
+            }
+            input.click();
+        }
+
+        function reset_button_ui_log() {
+            document.getElementById("default_button_ui").innerHTML = '';
+            document.getElementById("default_button_ui").innerHTML += '<li class="button_ui_item"><a href="#" onclick="change_view_pid(-1)">上家</a></li>';
+            document.getElementById("default_button_ui").innerHTML += '<li class="button_ui_item"><a href="#" onclick="change_view_pid(1)">下家</a></li>';
+        }
+
+        async function log_pos_selected(pos) {
+            unhighlight_log_pos();
+            let state_json = await eel.log_pos_selected(pos)();
+            let view_pid = await eel.get_view_pid()();
+            update_board(state_json, view_pid);
+            highlight_log_pos(pos);
+        }
+
+        async function change_view_pid(add) {
+            let view_pid = await eel.change_view_pid(add)();
+            let state_json = await eel.get_game_state(-1)();
+            update_board(state_json, view_pid);
+        }
+    </script>
+</head>
+
+<body>
+    <ul id="dropmenu">
+        <li><a href="#">File</a>
+          <ul>
+            <li><a href="#" onclick="open_file()">Open</a></li>
+            <li><a href="#">empty 0</a></li>
+          </ul>
+        </li>
+        <li><a href="#">AI</a>
+          <ul>
+            <li><a href="#">empty 1</a></li>
+          </ul>
+        </li>
+    </ul>
+    <div class="main">
+        <div id="board" class="board"></div>
+        <div class="controller_container">
+            <div id="log_table_container" class="log_table_container"></div>
+        </div>
+        <div>
+            <ul id="default_button_ui" class="button_ui"></ul>
+        </div>
+    </div>
+</body>
+</html>

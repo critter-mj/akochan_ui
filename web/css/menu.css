@@ -1,0 +1,58 @@
+/*--------------------▼メニューバーcss▼--------------------*/
+#dropmenu{
+    position: relative;
+    list-style-type: none;
+    height: 30px;
+    background-color: #505050;
+    z-index: 10; /*メニューを最前面に表示する*/
+  }
+  #dropmenu li{
+    width: 120px;
+    float: left;
+    text-align: center;
+  }
+  #dropmenu li a{
+    display: block;
+    margin: 0;
+    padding: 5px 0 4px;
+    color: #AAAAAA;
+    font-size: 14px;
+    text-decoration: none;
+    border-left:1px solid #606060; /* 左区切り線 paddingとの関係を調整しないとはみ出てしまう*/ 
+    border-right:1px solid #606060; /* 右区切り線 */
+    background-color: #505050;
+  }
+  #dropmenu li ul{
+    list-style: none;
+    position: absolute;
+    top: 100%;
+  }
+  #dropmenu li ul li{
+    overflow: hidden;
+    width: 120px;
+    float: none;
+    height: 0;
+    color: #fff;
+  }
+  #dropmenu li ul li a{
+    padding-left: 8px;
+    /*background: #6495ED;*/ /*ドロップメニューバーの色*/
+    background-color: #505050;
+    text-align: left;
+    font-size: 14px;
+    font-weight: normal;
+  }
+  #dropmenu li:hover > a{
+    background: #808080; /*マウスを合わせたときのメニューバーの色*/
+    color: #CCCCCC; /*マウスを合わせたときのメニューバーの字の色*/
+  }
+  #dropmenu > li:hover > a{
+    border-radius: 0 0 0 0; /*丸みを失くす*/
+  }
+  #dropmenu li:hover ul li{
+    overflow: visible;
+    height: 28px;
+    border-top: 1px solid #606060; /*ドロップメニューバーの境界上側の色　明度+2*/
+    border-bottom: 1px solid #606060; /*ドロップメニューバーの境界下側の色　明度-2*/
+  }
+  /*--------------------▲メニューバーcss▲--------------------*/

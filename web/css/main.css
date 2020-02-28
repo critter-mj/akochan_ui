@@ -1,0 +1,248 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  background-color: #303030;
+}
+  
+/* These sizes should be even numbers to get good rendering when they are rotated. */
+/* Original size: 33x59 */
+/* Original size: 44x49 */
+.main {
+  position: relative;
+}
+
+.repeated {
+  display: none; }
+
+.pai {
+  width: 22px;
+  height: 40px; }
+
+.laid-pai {
+  width: 30px;
+  height: 32px; }
+
+.board {
+  background-color: green;
+  /*
+  background-image: url(../background.jpg);
+  background-color:rgba(96,96,96,0.5);
+  background-blend-mode: darken;
+  background-size: contain;
+  */
+  position: relative;
+  left: 0px;
+  top: 0px;
+  width: 550px;
+  height: 550px; }
+
+.player {
+  /* border: 1px black solid; */
+  width: 550px;
+  position: absolute; }
+
+.player-0 {
+  left: 0px;
+  top: 350px;
+  -webkit-transform: rotate(0deg);
+  transform: rotate(0deg); }
+
+.player-1 {
+  left: 175px;
+  top: 175px;
+  -webkit-transform: rotate(270deg);
+  transform: rotate(270deg); }
+
+.player-2 {
+  left: 0px;
+  top: 0px;
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg); }
+
+.player-3 {
+  left: -175px;
+  top: 175px;
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg); }
+
+.kyoku-info-container {
+  position: absolute;
+  left: 222px;
+  top: 225px;
+  color: #101010;
+}
+
+.onboard_string {
+  color: #CCCCCC;
+  text-shadow    : 
+    1px  1px 1px #333333,
+    -1px  1px 1px #333333,
+    1px -1px 1px #333333,
+    -1px -1px 1px #333333,
+    1px  0px 1px #333333,
+    0px  1px 1px #333333,
+    -1px  0px 1px #333333,
+    0px -1px 1px #333333;   
+}
+
+.wanpais-container {
+  position: absolute;
+  left: 209px;
+  top: 255px; }
+
+.kyotaku {
+  width: 35px;
+  height: 9px;
+  transform: rotate(90deg);
+  margin-right: -5px;
+  vertical-align: 2px;
+}
+
+.remain_icon {
+  width: 16px;
+  height: 30px;
+  margin-left: 3px;
+  margin-right: 8px;
+  vertical-align: -9px;
+}
+
+.num_info-container {
+  position: absolute;
+  left: 205;
+  top: 305px;
+}
+
+.ho {
+  margin-left: 209px;
+  margin-bottom: 40px; }
+
+.player-info-container {
+  position: absolute;
+  left: 120px;
+  top: 105px;
+}
+
+.furo-container {
+  float: right; }
+
+.tehai-container {
+  margin-left: 121px;
+  float: left; }
+
+.tsumo-pai {
+  margin-left: 5.5px; }
+
+.player-footer {
+  clear: both; }
+
+.pai-row {
+  height: 40px; }
+
+
+/*# sourceMappingURL=style.css.map */
+
+
+.controller_container {
+	position: absolute;
+	left: 550px;
+	top: 0px;
+	padding: 8px; }
+
+#log_table_container {
+	position: absolute;
+  	left: 0px;
+  	top: 0px;
+	width: 500px;
+	height: 550px;
+	/*background-color: #00FFFF;*/
+  overflow: scroll;
+}
+
+#log_table_container::-webkit-scrollbar {
+  width: 15px;
+  height: 15px;
+}
+
+#log_table_container::-webkit-scrollbar-track {
+  border: solid 1px #555555;
+}
+
+#log_table_container::-webkit-scrollbar-thumb {
+  background: #555555;
+}
+
+#log_table_container::-webkit-scrollbar-corner {
+  background-color: #303030;
+}
+
+.log_num {
+  /* width: 200px; 現状固定できない*/
+  font-size: 14px;
+  color: #CC88CC;
+}
+
+.log_action {
+  font-size: 14px;
+  color: #CCCCCC;
+}
+
+.log_action a {
+  font-size: 14px;
+  color: #CCCCCC;
+  text-decoration: none;
+}
+
+.log_selected_action {
+  font-size: 14px;
+  color: #CCCCCC;
+  background-color: #305080;
+}
+
+.log_selected_action a {
+  font-size: 14px;
+  color: #CCCCCC;
+  text-decoration: none;
+}
+
+/* player-info-container */
+
+.player-info-container {
+  color: #101010;
+}
+
+.wind_icon {
+  width: 30px;
+  height: 24px;
+}
+
+.reach_stick {
+  width: 150px;
+  height: 18px;
+}
+
+/* button_ui */
+
+.button_ui_item{
+	list-style: none;
+	width: 100px;
+  text-align: center;
+  color: #AAAAAA;
+	background-color: #303030;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #606060;
+	float: left;
+	height: 50px;
+    line-height: 50px;
+    margin-top: 5px;
+  	margin-right: 5px;
+}
+.button_ui_item a{
+  display: block;
+  color: #CCCCCC;
+  background-color: #707070;
+	text-decoration: none;
+}
