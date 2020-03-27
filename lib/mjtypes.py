@@ -1,6 +1,7 @@
 from enum import IntEnum
 import json
 import copy
+import random
 
 def is_valid_hai(hai):
     return 0 < hai and hai < 38
@@ -194,6 +195,18 @@ def hai_int_to_str(hai_int):
     else:
         assert False, "hai_int_to_str_error"
         return "?"
+
+def get_hai38(hai136: int) -> int:
+	if hai136 == 16:
+		return 10
+	elif hai136 == 52:
+		return 20
+	elif hai136 == 88:
+		return 30
+	else:
+		haic = hai136//36
+		hain = (hai136%36)//4 + 1
+		return 10*haic + hain
 
 class Fuuro_Type(IntEnum):
 	FT_CHI = 1
@@ -573,4 +586,10 @@ def player_label_str(name, player_state):
         ret += "r"
     else:
         ret += " "
+    return ret
+
+def create_haiyama():
+    haiyama = [i for i in range(136)]
+    random.shuffle(haiyama)
+    ret = [hai_int_to_str(get_hai38(i)) for i in haiyama]
     return ret

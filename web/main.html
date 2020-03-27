@@ -144,6 +144,70 @@
             let state_json = await eel.get_game_state(-1)();
             update_board(state_json, view_pid);
         }
+
+        function update_tehai_ui(state_json, view_pid) {
+            let ps = state_json["player_state"][view_pid];
+            let current_tsumo = null;
+            if ("current_tsumo" in ps) {
+                current_tsumo = ps["current_tsumo"];
+            }
+            let tags = get_tehai_ui_tags(ps["tehai"], current_tsumo);
+            console.log(tags);
+            let tehai_ui = document.getElementById("tehai_ui");
+            if (tehai_ui.children.length == 14) {
+                for (var i = 0; i < 14; i++) {
+                    if (tehai_ui.children[i].outerHTML != tags[i]) {
+                        tehai_ui.children[i].outerHTML = tags[i];
+                    }
+                }
+            } else {
+                document.getElementById("tehai_ui").innerHTML = '';
+                for (var i = 0; i < 14; i++) {
+                    document.getElementById("tehai_ui").innerHTML += tags[i];
+                }
+            }
+        }
+
+        eel.expose(update_child2)
+        function update_child2(state_json, view_pid) {
+            update_tehai_ui(state_json, view_pid);
+            let state_json_dcp = JSON.parse(JSON.stringify(state_json));
+            // プレイヤーの手牌を非表示にする。
+            // ここで要素を消したことが、update_tehai_uiの方に悪さをしないようにdeep copyしておく。
+            state_json_dcp["player_state"][view_pid]["tehai"] = [];
+            delete state_json_dcp["player_state"][view_pid]["current_tsumo"];
+            update_board(state_json_dcp, view_pid);
+
+            if (document.getElementById("default_button_ui").children.length != 5) {
+                // ログ表示の時に、children.lengthが5にならないように注意。
+                reset_button_ui();
+                // reset_button_uiを常時呼び出すと、関数実行の前後関係(?)の影響で、押せるべきところでボタンを押せなくなることがあるため、基本的に最初だけ呼ばれるようにする。
+            }
+        }
+
+        async function update_child() {
+            let view_pid = await eel.get_view_pid()();
+            let state_json = await eel.get_game_state(view_pid)();
+            update_child2(state_json, view_pid);
+        }
+
+        eel.expose(update)
+        function update(view_pid) {
+            update_child();
+            show_log(view_pid, false);
+        }
+
+        function start_game(){
+            let seed = window.prompt("Please input a random seed", "");
+            if (seed != null) {
+                seed = Number(seed);
+                if (isNaN(seed) || seed < 0) {
+                    window.alert('Please input a non-negative integer');
+                } else {
+                    eel.start_game(seed);
+                }
+            }
+        }
     </script>
 </head>
 
@@ -157,6 +221,7 @@
         </li>
         <li><a href="#">AI</a>
           <ul>
+            <li><a href="#" onclick="start_game()">Start Game</a></li>
             <li><a href="#">empty 1</a></li>
           </ul>
         </li>
@@ -166,9 +231,22 @@
         <div class="controller_container">
             <div id="log_table_container" class="log_table_container"></div>
         </div>
+        <div id="tehai_ui"></div> <!-- tehai_uiがボードの中にあると、クリックしても反応しないことがあるため、外に出す-->
         <div>
             <ul id="default_button_ui" class="button_ui"></ul>
         </div>
+        <div>
+            <ul id="kan_button_ui" class="button_ui"></ul>
+        </div>
+    </div>
+    <div id="dialog_end_kyoku">
+        <div id="dialog_background"></div>
+        <div id="dialog_content">
+            <div id="end_kyoku_info"></div>
+        </div>
+    </div> 
+
+
     </div>
 </body>
 </html>

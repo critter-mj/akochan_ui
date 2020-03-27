@@ -191,3 +191,30 @@ function dump_board(json, view_pid) {
     ret += dump_num_info(json);
     return ret;
 }
+
+function get_tehai_ui_tags(tehai, current_tsumo) {
+    ret = [];
+    for (var i = 0; i < tehai.length; i++) {
+        tag = '<img class="repeated pai_large pai_tehai_ui"';
+        tag += ' style="display: inline;"';
+        tag += ' onclick="tehai_clicked(' + String(i) + ')"';
+        tag += ' src="img/' + tehai[i] + '_0.png">';
+        ret.push(tag);
+    }
+    if (current_tsumo != null) {
+        tag = '<img class="tsumo-pai pai_large pai_tehai_ui"';
+        tag += ' style="display: inline;"';
+        tag += ' onclick="tehai_clicked(' + String(tehai.length) + ')"';
+        tag += ' src="img/' + current_tsumo + '_0.png">';
+        ret.push(tag);
+    } else {
+        ret.push('<img class="tsumo-pai" style="display: none;">');
+    }
+    for (var i = tehai.length; i < 13; i++) {
+        ret.push('<img class="tsumo-pai" style="display: none;">');
+    }
+    //for (var i = 0; i < tehai.length; i++) {
+    //    ret.push('<img class="tsumo-pai" style="display: none;">');
+    //}
+    return ret;
+}
