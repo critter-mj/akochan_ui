@@ -246,3 +246,14 @@ body {
   background-color: #707070;
 	text-decoration: none;
 }
+
+/* tehai_ui */
+
+.pai_large {
+  width: 40px;
+  height: 56px;
+}
+
+.pai_tehai_ui:hover {
+  opacity: 0.5;
+}

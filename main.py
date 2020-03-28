@@ -52,13 +52,16 @@ class Global_State:
 
         input_json["request"] = request_json
         cmd += json.dumps(input_json, separators=(',', ':'))
+        print("---cmd---")
+        print(cmd)
         c = subprocess.check_output(cmd.split()).decode('utf-8').rstrip()
+        print("---recv")
+        print(c)
         return json.loads(c)
 
     def loop(self, user_request):
         while True:
             recv_json = self.call_game_server(user_request)
-            print(recv_json)
             user_request = {}
             #recv_json = json.loads(recv_message)
             if recv_json["msg_type"].startswith("update"):
@@ -185,6 +188,80 @@ def start_game(seed):
     gs.ui_state = UI_State.UI_MATCH_UPDATE
     random.seed(seed)
     gs.loop({})
+
+def do_pon_chi(c1, c2):
+    assert gs.ui_state == UI_State.UI_MATCH_FUURO, "do_pon_chi gs.ui_state is not UI_MATCH_FUURO"
+    assert is_valid_hai(c1) and is_valid_hai(c2), "do_pon_chi hai is not valid"
+    gs.ui_state = UI_State.UI_MATCH_UPDATE
+    hai = hai_str_to_int(gs.log_json[-1]["pai"])
+    target = gs.log_json[-1]["actor"]
+    consumed = [c1, c2]
+    consumed.sort(key=lambda hai: haikind(hai)*100 + hai)
+    gs.prev_selected_pos = -1 # update_and_fuuro の時にperv_selected_pos = -1にしているため不要かもしれない。
+    if haikind(c1) == haikind(c2):
+        gs.loop(make_pon(gs.view_pid, target, hai, consumed))
+    else:
+        gs.loop(make_chi(gs.view_pid, target, hai, consumed))
+
+# 打牌を行うときに、send_stringし更新を待ってから描画を行うとなぜかとても動作が遅いため、合法な打牌である場合先に描画してからsend_stringする。
+def update_tehai_ui_if_legal_dahai(action_json):
+    for moves in gs.legal_moves:
+        if moves[0] == action_json:
+            game_state = copy.deepcopy(gs.game_state)
+            game_state.go_next_state(action_json)
+            eel.update_child2(game_state.to_json(gs.view_pid), gs.view_pid)()
+            break
+
+@eel.expose
+def tehai_clicked(pos):
+    print("tehai_clicked: " + str(pos))
+    tehai_list = get_sorted_tehai(gs.game_state.player_state[gs.view_pid].tehai)
+    if gs.ui_state == UI_State.UI_MATCH_DAHAI:
+        gs.ui_state = UI_State.UI_MATCH_UPDATE
+        if pos == len(tehai_list):
+            hai = gs.game_state.player_state[gs.view_pid].prev_tsumo
+            tsumogiri = True
+        else:
+            hai = tehai_list[pos]
+            tsumogiri = False
+
+        action_json = make_dahai(gs.view_pid, hai, tsumogiri)
+        update_tehai_ui_if_legal_dahai(action_json)
+        gs.loop(action_json)
+    elif gs.ui_state == UI_State.UI_MATCH_FUURO and 0 <= gs.prev_selected_pos and pos == gs.prev_selected_pos:
+        gs.prev_selected_pos = -1
+        #gs.tehai_info.update(gs.game_state.player_state[gs.view_pid], gs.HAI_IMAGE)
+    elif gs.ui_state == UI_State.UI_MATCH_FUURO and 0 <= gs.prev_selected_pos and is_valid_hai(tehai_list[gs.prev_selected_pos]):
+        do_pon_chi(tehai_list[gs.prev_selected_pos], tehai_list[pos])
+    elif gs.ui_state == UI_State.UI_MATCH_FUURO:
+        gs.prev_selected_pos = pos
+        #gs.tehai_info.update(gs.game_state.player_state[gs.view_pid], gs.HAI_IMAGE)
+
+@eel.expose
+def do_hora():
+    if gs.ui_state == UI_State.UI_MATCH_DAHAI or gs.ui_state == UI_State.UI_MATCH_FUURO:
+        gs.ui_state = UI_State.UI_MATCH_UPDATE
+        hai = hai_str_to_int(gs.log_json[-1]["pai"])
+        target = gs.log_json[-1]["actor"]
+        gs.loop(make_hora(gs.view_pid, target, hai))
+
+@eel.expose
+def do_reach():
+    if gs.ui_state == UI_State.UI_MATCH_DAHAI:
+        gs.ui_state = UI_State.UI_MATCH_UPDATE
+        gs.loop(make_reach(gs.view_pid))
+
+@eel.expose
+def do_pass():
+    if gs.ui_state == UI_State.UI_MATCH_FUURO:
+        gs.ui_state = UI_State.UI_MATCH_UPDATE
+        gs.loop(make_none(gs.view_pid))
+
+@eel.expose
+def do_kyushukyuhai():
+    if gs.ui_state == UI_State.UI_MATCH_DAHAI or gs.ui_state == UI_State.UI_MATCH_FUURO:
+        gs.ui_state = UI_State.UI_MATCH_UPDATE
+        gs.loop(make_kyushukyuhai(gs.view_pid))
 
 if __name__ == '__main__':
      main()

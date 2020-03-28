@@ -458,7 +458,7 @@ def make_none(actor):
     d = {}
     d["type"] = "none"
     d["actor"] = actor
-    return json.dumps(d)
+    return d
 
 def make_dahai(actor, hai, tsumogiri):
     d = {}
@@ -466,13 +466,13 @@ def make_dahai(actor, hai, tsumogiri):
     d["actor"] = actor
     d["pai"] = hai_int_to_str(hai)
     d["tsumogiri"] = tsumogiri
-    return json.dumps(d)
+    return d
 
 def make_reach(actor):
     d = {}
     d["type"] = "reach"
     d["actor"] = actor
-    return json.dumps(d)
+    return d
 
 def make_chi(actor, target, hai, consumed):
     d = {}
@@ -481,7 +481,7 @@ def make_chi(actor, target, hai, consumed):
     d["target"] = target
     d["pai"] = hai_int_to_str(hai)
     d["consumed"] = [hai_int_to_str(consumed[0]), hai_int_to_str(consumed[1])]
-    return json.dumps(d)
+    return d
 
 def make_pon(actor, target, hai, consumed):
     d = {}
@@ -490,7 +490,7 @@ def make_pon(actor, target, hai, consumed):
     d["target"] = target
     d["pai"] = hai_int_to_str(hai)
     d["consumed"] = [hai_int_to_str(consumed[0]), hai_int_to_str(consumed[1])]
-    return json.dumps(d)
+    return d
 
 def make_pon_default(actor, target, hai):
     return make_pon(actor, target, hai, [haikind(hai), haikind(hai)])
@@ -505,7 +505,7 @@ def make_daiminkan(actor, target, hai, consumed):
     d["target"] = target
     d["pai"] = hai_int_to_str(hai)
     d["consumed"] = [hai_int_to_str(consumed[0]), hai_int_to_str(consumed[1]), hai_int_to_str(consumed[2])]
-    return json.dumps(d)
+    return d
 
 def make_daiminkan_default(actor, target, hai):
     return make_daiminkan(actor, target, hai, [haikind(hai), haikind(hai), haikind(hai)])
@@ -519,7 +519,7 @@ def make_ankan(actor, consumed):
     d["type"] = "ankan"
     d["actor"] = actor
     d["consumed"] = [hai_int_to_str(consumed[0]), hai_int_to_str(consumed[1]), hai_int_to_str(consumed[2]), hai_int_to_str(consumed[3])]
-    return json.dumps(d)
+    return d
 
 def make_ankan_default(actor, hai):
     return make_ankan(actor, [haikind(hai), haikind(hai), haikind(hai), haikind(hai)])
@@ -534,7 +534,7 @@ def make_kakan(actor, hai, consumed):
     d["actor"] = actor
     d["pai"] = hai_int_to_str(hai)
     d["consumed"] = [hai_int_to_str(consumed[0]), hai_int_to_str(consumed[1]), hai_int_to_str(consumed[2])]
-    return json.dumps(d)
+    return d
 
 def make_kakan_default(actor, hai):
     return make_kakan(actor, hai, [haikind(hai), haikind(hai), haikind(hai)])
@@ -549,14 +549,14 @@ def make_hora(actor, target, hai):
     d["actor"] = actor
     d["target"] = target
     d["pai"] = hai_int_to_str(hai)
-    return json.dumps(d)
+    return d
 
 def make_kyushukyuhai(actor):
     d = {}
     d["type"] = "ryukyoku"
     d["reason"] = "kyushukyuhai"
     d["actor"] = actor
-    return json.dumps(d)
+    return d
 
 def mask_action(action_json, view_pid):
     ret = copy.deepcopy(action_json)
