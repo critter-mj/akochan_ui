@@ -42,7 +42,12 @@ class Global_State:
         c = subprocess.check_output(cmd.split())
         c = c.decode('utf-8').rstrip()
         input_json = {}
-        input_json["record"] = self.log_json
+        game_record = []
+        for action in self.log_json:
+            if action["type"] == "start_kyoku":
+                game_record = [game_record[0]]
+            game_record.append(action)
+        input_json["record"] = game_record
         request_json = user_request
         if 0 < len(self.log_json):
             last_action = self.log_json[-1]
@@ -69,13 +74,13 @@ class Global_State:
                 # to do playwavfile
                 for new_action in recv_json["new_moves"]:
                     gs.log_json.append(new_action)
+                    if "actor" in new_action and new_action["actor"] == gs.view_pid and new_action["type"] != "tsumo":
+                        eel.reset_button_ui()()
 
                 gs.log_pos = len(gs.log_json) - 1
                 gs.update_game_state_by_log_pos()
 
                 eel.update(gs.view_pid)() # 括弧を二重にすると同期するらしい。
-                #if "actor" in recv_json["action"] and recv_json["action"]["actor"] == gs.view_pid and recv_json["action"]["type"] != "tsumo":
-                #    eel.reset_button_ui()()
 
                 if recv_json["msg_type"] == "update":
                     if gs.log_json[-1]["type"] == "end_game":
