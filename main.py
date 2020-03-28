@@ -1,6 +1,4 @@
-import os
 import json
-import zmq
 import eel
 
 from lib.mjtypes import *
