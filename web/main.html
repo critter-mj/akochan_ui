@@ -299,6 +299,72 @@
             document.getElementById("dialog_end_kyoku").style.display = "none";
             eel.confirm_end_kyoku();
         }
+
+        eel.expose(show_end_kyoku)
+        function show_end_kyoku(action_json) {
+            info_str = '<div>';
+            if (action_json["type"] == "hora") {
+                info_str += '和了 actor: ' + action_json["actor"] + ' target: ' + action_json["target"];
+            } else if (action_json["type"] == "ryukyoku" && action_json["reason"] == "fanpai") {
+                info_str += '流局'
+            } else if (action_json["type"] == "ryukyoku" && action_json["reason"] == "kyushukyuhai") {
+                info_str += '流局（九種九牌） actor: ' + action_json["actor"];
+            }
+            info_str += '</div>';
+
+            hora_str = '<div>';
+            if (action_json["type"] == "hora") {
+                hora_str += action_json["fan"] + ' 翻 ' + action_json["fu"] + ' 符 ';
+                if ("uradora_marker" in action_json) {
+                    hora_str += ' 裏ドラ表示: ';
+                    for (var i = 0; i < action_json["uradora_marker"].length; i++) {
+                        hora_str += '<img class="pai" style="display: inline;" src="img/' + action_json["uradora_marker"][i] + '_0.png">';
+                    }
+                }
+            }
+            hora_str += '</div>';
+
+            tehai_str = '<div>';
+            if (action_json["type"] == "hora") {
+                tehai_str += '<img class="repeated">';
+                for (var i = 0; i < action_json["hora_tehais"].length; i++) {
+                    tehai_str += '<img class="repeated pai_large" style="display: inline;" src="img/' + action_json["hora_tehais"][i] + '_0.png">';
+                }
+                tehai_str += '<img class="tsumo-pai pai_large" style="display: inline;" src="img/' + action_json["pai"] + '_0.png">';
+            } else if (action_json["type"] == "ryukyoku" && action_json["reason"] == "fanpai") {
+                tehai_str += '<table class="ryukyoku_tehai_table">'
+                for (var pid = 0; pid < 4; pid++) {
+                    tehai_str += '<tr><td>';
+                    for (var i = 0; i < action_json["tehais"][pid].length; i++) {
+                        if (action_json["tehais"][pid][i] == '?') {
+                            tehai_str += '<img class="repeated pai_large" style="display: inline;" src="img/0_0.png">';
+                        } else {
+                            tehai_str += '<img class="repeated pai_large" style="display: inline;" src="img/' + action_json["tehais"][pid][i] + '_0.png">';
+                        }
+                    }
+                    tehai_str += '</td></tr>';
+                }
+                tehai_str += '</table>';
+            } else if (action_json["type"] == "ryukyoku" && action_json["reason"] == "kyushukyuhai") {
+                tehai_str += '<img class="repeated">';
+                let actor = action_json["actor"];
+                for (var i = 0; i < action_json["tehais"][actor].length; i++) {
+                    tehai_str += '<img class="repeated pai_large" style="display: inline;" src="img/' + action_json["tehais"][actor][i] + '_0.png">';
+                }
+            }
+            tehai_str += '</div>';
+
+            table_str = '<div><table class="ryukyoku_score_table">';
+            for (var i = 0; i < 4; i++) {
+                table_str += '<tr><td>Player' + String(i) + '</td><td>' + String(action_json["scores"][i]) + '</td></tr>';
+            }
+            table_str += '</table></div>';
+
+            confirm_str = '<div class="end_kyoku_confirm"><a href="#" onclick="confirm_end_kyoku()">OK</a></div>';
+
+            document.getElementById("end_kyoku_info").innerHTML = info_str + hora_str + tehai_str + table_str + confirm_str;
+            document.getElementById("dialog_end_kyoku").style.display = "block";
+        }
     </script>
 </head>
 

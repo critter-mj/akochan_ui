@@ -49,6 +49,8 @@ class Global_State:
             if last_action["type"] == "start_game":
                 request_json["chicha"] = 0
                 request_json["haiyama"] = create_haiyama()
+            elif last_action["type"] == "hora" or last_action["type"] == "ryukyoku":
+                request_json["haiyama"] = create_haiyama()
 
         input_json["request"] = request_json
         cmd += json.dumps(input_json, separators=(',', ':'))
@@ -63,7 +65,6 @@ class Global_State:
         while True:
             recv_json = self.call_game_server(user_request)
             user_request = {}
-            #recv_json = json.loads(recv_message)
             if recv_json["msg_type"].startswith("update"):
                 # to do playwavfile
                 for new_action in recv_json["new_moves"]:
@@ -80,9 +81,10 @@ class Global_State:
                     if gs.log_json[-1]["type"] == "end_game":
                         gs.ui_state = UI_State.UI_DEFAULT
                         break
-                    #if recv_json["action"]["type"] == "hora" or recv_json["action"]["type"] == "ryukyoku":
-                    #    eel.show_end_kyoku(recv_json["action"])()
-                    #    break
+                    if gs.log_json[-1]["type"] == "hora" or gs.log_json[-1]["type"] == "ryukyoku":
+                        eel.show_end_kyoku(gs.log_json[-1])()
+                        # to do ダブロン対応
+                        break
                 elif recv_json["msg_type"] == "update_and_dahai":
                     gs.ui_state = UI_State.UI_MATCH_DAHAI
                     break
@@ -262,6 +264,39 @@ def do_kyushukyuhai():
     if gs.ui_state == UI_State.UI_MATCH_DAHAI or gs.ui_state == UI_State.UI_MATCH_FUURO:
         gs.ui_state = UI_State.UI_MATCH_UPDATE
         gs.loop(make_kyushukyuhai(gs.view_pid))
+
+@eel.expose
+def do_daiminkan():
+    assert gs.ui_state == UI_State.UI_MATCH_FUURO, "do_daiminkan gs.ui_state is not UI_MATCH_FUURO"
+    gs.ui_state = UI_State.UI_MATCH_UPDATE
+    hai = hai_str_to_int(gs.log_json[-1]["pai"])
+    target = gs.log_json[-1]["actor"]
+    if hai % 10 == 5 and hai < 30:
+        gs.loop(make_daiminkan_aka(gs.view_pid, target, hai))
+    else:
+        gs.loop(make_daiminkan_default(gs.view_pid, target, hai))
+
+@eel.expose
+def do_ankan(hai_str):
+    assert gs.ui_state == UI_State.UI_MATCH_DAHAI, "do_ankan gs.ui_state is not UI_MATCH_DAHAI"
+    hai = haikind(hai_str_to_int(hai_str))
+    if hai % 10 == 5 and hai < 30:
+        gs.loop(make_ankan_aka(gs.view_pid, hai))
+    else:
+        gs.loop(make_ankan_default(gs.view_pid, hai))
+
+@eel.expose
+def do_kakan(hai_str):
+    assert gs.ui_state == UI_State.UI_MATCH_DAHAI, "do_kakan gs.ui_state is not UI_MATCH_DAHAI"
+    hai = hai_str_to_int(hai_str)
+    if hai % 10 == 5 and hai < 30:
+        gs.loop(make_kakan_aka(gs.view_pid, hai))
+    else:
+        gs.loop(make_kakan_default(gs.view_pid, hai))
+
+@eel.expose
+def confirm_end_kyoku():
+    gs.loop({})
 
 if __name__ == '__main__':
      main()
