@@ -3,20 +3,26 @@ Execute main.py
 
 ```$ python main.py```
 
-## Read mjai log
-You can read a mjai-log in log directory by
+## Read an mjai log
+You can read an mjai-log in log directory by
 
 ```File > Open```
 
-## Play game
-You need to copy following from akochan
+## Play a game
+You need to copy following from akochan (dev_game branch)
 
 ai.dll (windows)  
-libai.so (linux)
-system.exe
-setup_mjai.json
-params
+libai.so (linux)  
+system.exe  
+setup_mjai.json  
+params  
 
 Then you can play a game by
 
 ```AI > Start Game```
+
+and input random seed (non-negative integer).
+
+## Used materials
+
+Images : https://majandofu.com/mahjong-images
