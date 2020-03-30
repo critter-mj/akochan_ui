@@ -73,42 +73,43 @@ class Global_State:
             if recv_json["msg_type"].startswith("update"):
                 # to do playwavfile
                 for new_action in recv_json["new_moves"]:
-                    gs.log_json.append(new_action)
-                    if (("actor" in new_action and new_action["actor"] == gs.view_pid and new_action["type"] != "tsumo") or
+                    self.log_json.append(new_action)
+                    if (("actor" in new_action and new_action["actor"] == self.view_pid and new_action["type"] != "tsumo") or
                         (new_action["type"] == "start_kyoku")):
                         eel.reset_button_ui_game()()
 
-                gs.log_pos = len(gs.log_json) - 1
-                gs.update_game_state_by_log_pos()
+                self.log_pos = len(self.log_json) - 1
+                self.update_game_state_by_log_pos()
 
-                eel.update_game(gs.view_pid)() # 括弧を二重にすると同期するらしい。
+                eel.update_game(self.view_pid)() # 括弧を二重にすると同期するらしい。
+                # 現状他家のツモ牌を表示することができていない。self.log_jsonの長さを条件にreturnすると、その巡のツモは見えるので、同期処理の問題と思われる。
 
                 if recv_json["msg_type"] == "update":
-                    if gs.log_json[-1]["type"] == "end_game":
-                        gs.ui_state = UI_State.UI_DEFAULT
+                    if self.log_json[-1]["type"] == "end_game":
+                        self.ui_state = UI_State.UI_DEFAULT
                         break
-                    if gs.log_json[-1]["type"] == "hora" or gs.log_json[-1]["type"] == "ryukyoku":
-                        eel.show_end_kyoku(gs.log_json[-1])()
+                    if self.log_json[-1]["type"] == "hora" or self.log_json[-1]["type"] == "ryukyoku":
+                        eel.show_end_kyoku(self.log_json[-1])()
                         # to do ダブロン対応
                         break
                 elif recv_json["msg_type"] == "update_and_dahai":
-                    gs.ui_state = UI_State.UI_MATCH_DAHAI
+                    self.ui_state = UI_State.UI_MATCH_DAHAI
                     break
                 else:
-                    gs.prev_selected_pos = -1
-                    gs.ui_state = UI_State.UI_MATCH_FUURO
+                    self.prev_selected_pos = -1
+                    self.ui_state = UI_State.UI_MATCH_FUURO
                     break
             elif recv_json["msg_type"] == "dahai_again":
-                gs.ui_state = UI_State.UI_MATCH_DAHAI
+                self.ui_state = UI_State.UI_MATCH_DAHAI
                 break
             elif recv_json["msg_type"] == "fuuro_again":
-                gs.prev_selected_pos = -1
-                gs.ui_state = UI_State.UI_MATCH_FUURO
+                self.prev_selected_pos = -1
+                self.ui_state = UI_State.UI_MATCH_FUURO
                 break
         
-        if gs.ui_state == UI_State.UI_MATCH_DAHAI or gs.ui_state == UI_State.UI_MATCH_FUURO:
+        if self.ui_state == UI_State.UI_MATCH_DAHAI or self.ui_state == UI_State.UI_MATCH_FUURO:
             if "legal_moves" in recv_json:
-                gs.legal_moves = recv_json["legal_moves"]
+                self.legal_moves = recv_json["legal_moves"]
                 def type_exist(type_str):
                     for lm in recv_json["legal_moves"]:
                         if lm[0]["type"] == type_str:
@@ -130,7 +131,7 @@ class Global_State:
                 if type_exist("ryukyoku"):
                     eel.activate_ryukyoku_button()()
 
-                if gs.ui_state == UI_State.UI_MATCH_DAHAI:
+                if self.ui_state == UI_State.UI_MATCH_DAHAI:
                     for lm in recv_json["legal_moves"]:
                         if lm[0]["type"] == "ankan":
                             eel.append_ankan_button(lm[0]["consumed"][0])()
@@ -138,10 +139,6 @@ class Global_State:
                             eel.append_kakan_button(lm[0]["pai"])()
 
 gs = Global_State()
-
-def main():
-    eel.init("web")
-    eel.start("main.html")
 
 @eel.expose
 def get_log(view_pid):
@@ -303,6 +300,10 @@ def do_kakan(hai_str):
 @eel.expose
 def confirm_end_kyoku():
     gs.loop({})
+
+def main():
+    eel.init("web")
+    eel.start("main.html")
 
 if __name__ == '__main__':
      main()
