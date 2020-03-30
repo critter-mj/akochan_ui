@@ -74,7 +74,8 @@ class Global_State:
                 # to do playwavfile
                 for new_action in recv_json["new_moves"]:
                     gs.log_json.append(new_action)
-                    if "actor" in new_action and new_action["actor"] == gs.view_pid and new_action["type"] != "tsumo":
+                    if (("actor" in new_action and new_action["actor"] == gs.view_pid and new_action["type"] != "tsumo") or
+                        (new_action["type"] == "start_kyoku")):
                         eel.reset_button_ui()()
 
                 gs.log_pos = len(gs.log_json) - 1

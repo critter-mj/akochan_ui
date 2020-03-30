@@ -224,12 +224,6 @@
             state_json_dcp["player_state"][view_pid]["tehai"] = [];
             delete state_json_dcp["player_state"][view_pid]["current_tsumo"];
             update_board(state_json_dcp, view_pid);
-
-            if (document.getElementById("default_button_ui").children.length != 5) {
-                // ログ表示の時に、children.lengthが5にならないように注意。
-                reset_button_ui();
-                // reset_button_uiを常時呼び出すと、関数実行の前後関係(?)の影響で、押せるべきところでボタンを押せなくなることがあるため、基本的に最初だけ呼ばれるようにする。
-            }
         }
 
         async function update_child() {
