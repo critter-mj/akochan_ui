@@ -168,8 +168,8 @@
             }
         }
 
-        eel.expose(reset_button_ui)
-        function reset_button_ui() {
+        eel.expose(reset_button_ui_game)
+        function reset_button_ui_game() {
             document.getElementById("default_button_ui").innerHTML = '';
             document.getElementById("default_button_ui").innerHTML += '<li id="hora_button" class="button_ui_item">和了</li>';
             document.getElementById("default_button_ui").innerHTML += '<li id="reach_button" class="button_ui_item">リーチ</li>';
@@ -215,8 +215,8 @@
             document.getElementById("kan_button_ui").innerHTML += '<li class="button_ui_item"><a href="#" onclick="kakan_clicked(\'' + pai_str + '\')">加槓<img class="kan-icon pai" src="img/' + pai_str + '_0.png"></a></li>';
         }
 
-        eel.expose(update_child2)
-        function update_child2(state_json, view_pid) {
+        eel.expose(update_game_child2)
+        function update_game_child2(state_json, view_pid) {
             update_tehai_ui(state_json, view_pid);
             let state_json_dcp = JSON.parse(JSON.stringify(state_json));
             // プレイヤーの手牌を非表示にする。
@@ -226,15 +226,15 @@
             update_board(state_json_dcp, view_pid);
         }
 
-        async function update_child() {
+        async function update_game_child() {
             let view_pid = await eel.get_view_pid()();
             let state_json = await eel.get_game_state(view_pid)();
-            update_child2(state_json, view_pid);
+            update_game_child2(state_json, view_pid);
         }
 
-        eel.expose(update)
-        function update(view_pid) {
-            update_child();
+        eel.expose(update_game)
+        function update_game(view_pid) {
+            update_game_child();
             show_log(view_pid, false);
         }
 
@@ -255,37 +255,37 @@
         }
 
         function hora_clicked() {
-            reset_button_ui();
+            reset_button_ui_game();
             eel.do_hora();
         }
 
         function reach_clicked() {
-            reset_button_ui();
+            reset_button_ui_game();
             eel.do_reach();
         }
 
         function daiminkan_clicked() {
-            reset_button_ui(); // 大明槓をしても他家がアガリをする場合など、その後の進行は不確定なため、はやいうちにbutton_uiはリセットする。
+            reset_button_ui_game(); // 大明槓をしても他家がアガリをする場合など、その後の進行は不確定なため、はやいうちにbutton_uiはリセットする。
             eel.do_daiminkan();
         }
 
         function pass_clicked() {
-            reset_button_ui();
+            reset_button_ui_game();
             eel.do_pass();
         }
 
         function ryukyoku_clicked() {
-            reset_button_ui();
+            reset_button_ui_game();
             eel.do_kyushukyuhai();
         }
 
         function ankan_clicked(hai_str) {
-            reset_button_ui();
+            reset_button_ui_game();
             eel.do_ankan(hai_str);
         }
 
         function kakan_clicked(hai_str) {
-            reset_button_ui();
+            reset_button_ui_game();
             eel.do_kakan(hai_str);
         }
 

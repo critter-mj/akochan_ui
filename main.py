@@ -76,12 +76,12 @@ class Global_State:
                     gs.log_json.append(new_action)
                     if (("actor" in new_action and new_action["actor"] == gs.view_pid and new_action["type"] != "tsumo") or
                         (new_action["type"] == "start_kyoku")):
-                        eel.reset_button_ui()()
+                        eel.reset_button_ui_game()()
 
                 gs.log_pos = len(gs.log_json) - 1
                 gs.update_game_state_by_log_pos()
 
-                eel.update(gs.view_pid)() # 括弧を二重にすると同期するらしい。
+                eel.update_game(gs.view_pid)() # 括弧を二重にすると同期するらしい。
 
                 if recv_json["msg_type"] == "update":
                     if gs.log_json[-1]["type"] == "end_game":
@@ -217,7 +217,7 @@ def update_tehai_ui_if_legal_dahai(action_json):
         if moves[0] == action_json:
             game_state = copy.deepcopy(gs.game_state)
             game_state.go_next_state(action_json)
-            eel.update_child2(game_state.to_json(gs.view_pid), gs.view_pid)()
+            eel.update_game_child2(game_state.to_json(gs.view_pid), gs.view_pid)()
             break
 
 @eel.expose
