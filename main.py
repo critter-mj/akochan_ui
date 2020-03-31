@@ -152,6 +152,10 @@ def get_log_pos():
     return gs.log_pos
 
 @eel.expose
+def get_log_len():
+    return len(gs.log_json)
+
+@eel.expose
 def get_view_pid():
     return gs.view_pid
 
