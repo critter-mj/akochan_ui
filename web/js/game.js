@@ -19,6 +19,10 @@ eel.expose(update_game)
 function update_game(view_pid) {
     update_game_child();
     show_log(view_pid, false);
+
+    var obj = document.getElementById("log_table_container");
+    obj.scrollTop = obj.scrollHeight;
+    // 何故か最下部は見えないが妥協。
 }
 
 function get_tehai_ui_tags(tehai, current_tsumo) {
