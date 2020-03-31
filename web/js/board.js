@@ -191,3 +191,74 @@ function dump_board(json, view_pid) {
     ret += dump_num_info(json);
     return ret;
 }
+
+function update_board(state_json, view_pid) {
+    if (document.getElementById("board").innerHTML == "") {
+        document.getElementById("board").innerHTML = dump_board(state_json, view_pid);
+    } else {
+        board_new = dump_board(state_json, view_pid);
+        var doc_new = new DOMParser().parseFromString(board_new, "text/html");
+
+        let tehais_old = document.getElementsByClassName("tehai-container pai-row");
+        let tehais_new = doc_new.getElementsByClassName("tehai-container pai-row");
+        for (var i = 0; i < tehais_old.length; i++) {
+            for (var j = 0; j < tehais_old[i].children.length; j++) {
+                if (tehais_old[i].children[j].outerHTML != tehais_new[i].children[j].outerHTML) {
+                    tehais_old[i].children[j].outerHTML = tehais_new[i].children[j].outerHTML;
+                }
+            }
+        }
+
+        let kawas_old = document.getElementsByClassName("repeated pai-row");
+        let kawas_new = doc_new.getElementsByClassName("repeated pai-row");
+        for (var i = 0; i < kawas_old.length; i++) {
+            for (var j = 0; j < kawas_old[i].children.length; j++) {
+                if (kawas_old[i].children[j].outerHTML != kawas_new[i].children[j].outerHTML) {
+                    kawas_old[i].children[j].outerHTML = kawas_new[i].children[j].outerHTML;
+                }
+            }
+        }
+
+        let furos_old = document.getElementsByClassName("furo-container pai-row");
+        let furos_new = doc_new.getElementsByClassName("furo-container pai-row");
+        for (var i = 0; i < furos_old.length; i++) {
+            if (furos_old[i].innerHTML != furos_new[i].innerHTML) {
+                furos_old[i].innerHTML = furos_new[i].innerHTML;
+            }
+        }
+
+        let player_info_old = document.getElementsByClassName("player-info-container");
+        let player_info_new = doc_new.getElementsByClassName("player-info-container");
+        for (var i = 0; i < player_info_old.length; i++) {
+            if (player_info_old[i].innerHTML != player_info_new[i].innerHTML) {
+                player_info_old[i].innerHTML = player_info_new[i].innerHTML;
+            }
+        }
+
+        let kyoku_info_old = document.getElementsByClassName("kyoku-info-container")[0];
+        let kyoku_info_new = doc_new.getElementsByClassName("kyoku-info-container")[0];
+        if (kyoku_info_old.innerHTML != kyoku_info_new.innerHTML) {
+            kyoku_info_old.innerHTML = kyoku_info_new.innerHTML;
+        }
+
+        let wanpai_old = document.getElementsByClassName("wanpais-container")[0];
+        let wanpai_new = doc_new.getElementsByClassName("wanpais-container")[0];
+        for (var i = 0; i < wanpai_old.children.length; i++) {
+            if (wanpai_old.children[i].outerHTML != wanpai_new.children[i].outerHTML) {
+                wanpai_old.children[i].outerHTML = wanpai_new.children[i].outerHTML;
+            }
+        }
+
+        if (wanpai_old.innerHTML != wanpai_new.innerHTML) {
+            wanpai_old.innerHTML = wanpai_new.innerHTML;
+        }
+
+        let num_info_old = document.getElementsByClassName("num_info-container")[0];
+        let num_info_new = doc_new.getElementsByClassName("num_info-container")[0];
+        for (var i = 0; i < num_info_old.children.length; i++) {
+            if (num_info_old.children[i].outerHTML != num_info_new.children[i].outerHTML) {
+                num_info_old.children[i].outerHTML = num_info_new.children[i].outerHTML;
+            }
+        }
+    }
+}
