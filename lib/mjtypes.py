@@ -321,22 +321,6 @@ class Game_State:
         self.player_state = [Player_State(scores[i], (i - oya + 4) % 4, tehai_array[i]) for i in range (4)]
         self.total_tsumo_num = 0
 
-    def to_json(self, view_pid):
-        # view_pid == -1 ならば全部の手牌が見える。
-        print("to_json:" + str(view_pid))
-        return {
-            "bakaze": kaze_int_to_str(self.bakaze),
-            "kyoku": self.kyoku,
-            "honba": self.honba,
-            "kyotaku": self.kyotaku,
-            "dora_marker": [hai_int_to_str(d) for d in self.dora_marker],
-            "player_state": [self.player_state[pid].to_json(
-                pid == view_pid or view_pid == -1,
-                "Player" + str(pid)
-            ) for pid in range(4)],
-            "total_tsumo_num": self.total_tsumo_num
-        }
-
     def go_next_state(self, action_json):
         if action_json["type"] != "tsumo" and action_json["type"] != "reach" and action_json["type"] != "hora":
             for i in range(4):
@@ -431,6 +415,21 @@ class Game_State:
             consumed.append(hai_str_to_int(action_json["consumed"][1]))
             consumed.append(hai_str_to_int(action_json["consumed"][2]))
             self.player_state[actor].replace_pon_to_kakan(Fuuro_Elem(Fuuro_Type.FT_KAKAN, hai, consumed, 0))
+
+    def to_json(self, view_pid):
+        # view_pid == -1 ならば全部の手牌が見える。
+        return {
+            "bakaze": kaze_int_to_str(self.bakaze),
+            "kyoku": self.kyoku,
+            "honba": self.honba,
+            "kyotaku": self.kyotaku,
+            "dora_marker": [hai_int_to_str(d) for d in self.dora_marker],
+            "player_state": [self.player_state[pid].to_json(
+                pid == view_pid or view_pid == -1,
+                "Player" + str(pid)
+            ) for pid in range(4)],
+            "total_tsumo_num": self.total_tsumo_num
+        }
 
 def get_game_state_start_kyoku(action_json_dict):
     assert action_json_dict["type"] == "start_kyoku", "get_game_state_start_kyoku_error"
