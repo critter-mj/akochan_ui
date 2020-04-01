@@ -1,7 +1,9 @@
 from enum import IntEnum
+from typing import List
 import json
 import copy
 import random
+import numpy as np
 
 def is_valid_hai(hai):
     return 0 < hai and hai < 38
@@ -208,6 +210,16 @@ def get_hai38(hai136: int) -> int:
 		hain = (hai136%36)//4 + 1
 		return 10*haic + hain
 
+def get_hai34(hai38: int) -> int:
+    hai = haikind(hai38)
+    return hai - (hai//10 + 1)
+
+def get_hai34_array(hai_array: List[int]) -> List[int]:
+    ret = [0 for i in range(34)]
+    for hai in range(38):
+        ret[get_hai34(hai)] += hai_array[hai]
+    return ret
+
 class Fuuro_Type(IntEnum):
 	FT_CHI = 1
 	FT_PON = 2
@@ -256,6 +268,19 @@ class Fuuro_Elem:
         if d["type"] != "ankan":
             d["pai"] = hai_int_to_str(self.hai)
         return d
+
+    def to_numpy(self):
+        tmp = [0 for i in range(34)]
+        if self.fuuro_type != Fuuro_Type.FT_ANKAN:
+            tmp[get_hai34(self.hai)] += 1
+        for hai in self.consumed:
+            tmp[get_hai34(hai)] += 1
+        ret = np.zeros((4, 34), dtype=np.int)
+        for hai in range(34):
+            for i in range(tmp[hai]):
+                ret[i][hai] = 1
+        #print(ret)
+        return ret
 
 class Sutehai:
     def __init__(self, hai, tsumogiri, is_reach):
@@ -308,6 +333,39 @@ class Player_State:
         if 0 < self.prev_tsumo:
             ret["current_tsumo"] = hai_int_to_str(self.prev_tsumo) if visible else '0'
         return ret
+
+    def to_numpy_fuuro(self):
+        if len(self.fuuro) == 0:
+            return np.zeros((4*4, 34), dtype=np.int)
+        else:
+            ret = np.concatenate([elem.to_numpy() for elem in self.fuuro])
+            zeros = np.zeros((4*(4 - len(self.fuuro)), 34), dtype=np.int)
+            return np.concatenate([ret, zeros])
+
+    def to_numpy_kawa(self):
+        length = 20
+        ret = np.zeros((length + 1, 34), dtype=np.int)
+        for i in range(min(len(self.kawa),length)):
+            hai = get_hai34(self.kawa[i].hai)
+            ret[i][hai] = 1
+            if self.kawa[i].is_reach:
+                ret[length][hai] = 1
+        return ret
+
+    def to_numpy_tehai(self):
+        tmp = get_hai34_array(self.tehai)
+        ret = np.zeros((4, 34), dtype=np.int)
+        for hai in range(34):
+            for i in range(tmp[hai]):
+                ret[i][hai] = 1
+        return ret
+
+    def to_numpy(self, tehai_flag):
+        visible = np.concatenate([self.to_numpy_fuuro(), self.to_numpy_kawa()])
+        if tehai_flag:
+            return np.concatenate([self.to_numpy_tehai(), visible])
+        else:
+            return visible
         
 class Game_State:
     def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, dora_marker, tehai_array):
@@ -430,6 +488,11 @@ class Game_State:
             ) for pid in range(4)],
             "total_tsumo_num": self.total_tsumo_num
         }
+
+    def to_numpy(self, my_pid):
+        # my_pid is 0,1,2,3
+        ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
+        return ps
 
 def get_game_state_start_kyoku(action_json_dict):
     assert action_json_dict["type"] == "start_kyoku", "get_game_state_start_kyoku_error"
@@ -592,3 +655,25 @@ def create_haiyama():
     random.shuffle(haiyama)
     ret = [hai_int_to_str(get_hai38(i)) for i in haiyama]
     return ret
+
+def record_to_npy(game_record):
+    game_state = get_game_state_start_kyoku(json.loads(INITIAL_START_KYOKU))
+    feature_x = []
+    feature_y = []
+    for i, action in enumerate(game_record):
+        if action["type"] == "start_kyoku":
+            game_state = get_game_state_start_kyoku(action)
+        else:
+            game_state.go_next_state(action)
+        if action["type"] == "tsumo":
+            if game_record[i+1]["type"] == "dahai" or game_record[i+1]["type"] == "reach":
+                x = game_state.to_numpy(action["actor"])
+                feature_x.append(x)
+
+                y = np.zeros(34, dtype=np.int)
+                i_dahai = i+1 if game_record[i+1]["type"] == "dahai" else i+2
+                hai = hai_str_to_int(game_record[i_dahai]["pai"])
+                y[get_hai34(hai)] = 1
+                feature_y.append(y)
+                
+    return feature_x, feature_y

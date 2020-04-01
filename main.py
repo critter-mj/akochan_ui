@@ -1,6 +1,8 @@
 import json
 import subprocess
 import eel
+import pathlib
+import argparse
 
 from lib.util import *
 from lib.mjtypes import *
@@ -299,9 +301,31 @@ def do_kakan(hai_str):
 def confirm_end_kyoku():
     gs.loop({})
 
-def main():
-    eel.init("web")
-    eel.start("main.html")
+def main(args):
+    if args.dump_feature:
+        if args.out_dir == None:
+            print("please specify out_dir")
+            return
+
+        out_dir = pathlib.Path(args.out_dir)
+        if not out_dir.is_dir():
+            out_dir.mkdir()
+
+        if args.file_path != None:
+            gs.open_file(args.file_path)
+            train_X, train_Y = record_to_npy(gs.log_json)
+            for i, (x, y) in enumerate(zip(train_X, train_Y)):
+                np.savez(args.out_dir + "/" + args.file_path.split('.')[0] + "_train_" + str(i), x, y)
+        else:
+            print("please specify a file")
+    else:
+        eel.init("web")
+        eel.start("main.html")
 
 if __name__ == '__main__':
-     main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dump_feature', action='store_true')
+    parser.add_argument('--file_path')
+    parser.add_argument('--out_dir')
+    args = parser.parse_args()
+    main(args)
