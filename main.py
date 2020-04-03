@@ -6,6 +6,7 @@ import argparse
 
 from lib.util import *
 from lib.mjtypes import *
+from data_proc import *
 
 class UI_State(IntEnum):
     UI_DEFAULT = 0 # デフォルト
@@ -312,10 +313,10 @@ def main(args):
             out_dir.mkdir()
 
         if args.file_path != None:
-            gs.open_file(args.file_path)
-            train_X, train_Y = record_to_npy(gs.log_json)
-            for i, (x, y) in enumerate(zip(train_X, train_Y)):
-                np.savez(args.out_dir + "/" + args.file_path.split('.')[0] + "_train_" + str(i), x, y)
+            dp = Data_Processor()
+            game_record = read_log_json(args.file_path)
+            dp.process_record(game_record)
+            dp.dump(args.out_dir, 0)
         else:
             print("please specify a file")
     else:

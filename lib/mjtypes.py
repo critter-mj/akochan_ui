@@ -655,25 +655,3 @@ def create_haiyama():
     random.shuffle(haiyama)
     ret = [hai_int_to_str(get_hai38(i)) for i in haiyama]
     return ret
-
-def record_to_npy(game_record):
-    game_state = get_game_state_start_kyoku(json.loads(INITIAL_START_KYOKU))
-    feature_x = []
-    feature_y = []
-    for i, action in enumerate(game_record):
-        if action["type"] == "start_kyoku":
-            game_state = get_game_state_start_kyoku(action)
-        else:
-            game_state.go_next_state(action)
-        if action["type"] == "tsumo":
-            if game_record[i+1]["type"] == "dahai" or game_record[i+1]["type"] == "reach":
-                x = game_state.to_numpy(action["actor"])
-                feature_x.append(x)
-
-                y = np.zeros(34, dtype=np.int)
-                i_dahai = i+1 if game_record[i+1]["type"] == "dahai" else i+2
-                hai = hai_str_to_int(game_record[i_dahai]["pai"])
-                y[get_hai34(hai)] = 1
-                feature_y.append(y)
-                
-    return feature_x, feature_y
