@@ -303,7 +303,12 @@ def confirm_end_kyoku():
     gs.loop({})
 
 def main(args):
-    if args.dump_feature:
+    if args.dump_feature_tenhou:
+        if args.tenhou_id == None:
+            print("please specify tenhou_id")
+            return
+        proc_tenhou_mjailog(args.tenhou_id)
+    elif args.dump_feature:
         if args.out_dir == None:
             print("please specify out_dir")
             return
@@ -328,5 +333,7 @@ if __name__ == '__main__':
     parser.add_argument('--dump_feature', action='store_true')
     parser.add_argument('--file_path')
     parser.add_argument('--out_dir')
+    parser.add_argument('--dump_feature_tenhou', action='store_true')
+    parser.add_argument('--tenhou_id')
     args = parser.parse_args()
     main(args)
