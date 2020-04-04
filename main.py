@@ -2,6 +2,7 @@ import json
 import subprocess
 import eel
 
+from lib.util import *
 from lib.mjtypes import *
 
 class UI_State(IntEnum):
@@ -21,14 +22,9 @@ class Global_State:
         self.legal_moves = []
 
     def open_file(self, file_name):
-        self.log_json = []
+        self.log_json = read_log_json('./log/' + file_name)
         self.log_pos = 0
-        with open('./log/' + file_name, encoding="utf-8") as f:
-            l = f.readlines()
-            for i in range(len(l)):
-                self.log_json.append(json.loads(l[i]))
         return 0
-        # to do error handle
 
     def update_game_state_by_log_pos(self):
         if self.log_json[self.log_pos]["type"] == "start_kyoku":
