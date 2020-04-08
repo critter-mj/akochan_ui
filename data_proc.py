@@ -1,4 +1,5 @@
 import pathlib
+import glob
 import subprocess
 
 from lib.util import *
@@ -98,7 +99,7 @@ class Data_Processor:
             out_dir = pathlib.Path(out_dir_pathstr)
             if not out_dir.is_dir():
                 out_dir.mkdir(parents=True)
-            np.savez(out_dir_pathstr + "/" + action_type + "_" + tenhou_id, X, Y)
+            np.savez_compressed(out_dir_pathstr + "/" + action_type + "_" + tenhou_id, X, Y)
             X.clear()
             Y.clear()
 
@@ -115,5 +116,28 @@ def proc_tenhou_mjailog(tenhou_id):
     dp = Data_Processor()
     game_record = read_log_json("tenhou_mjailog/" + tenhou_id[:4] + "/" + tenhou_id[:8] + "/" + tenhou_id + ".json")
     dp.process_record(game_record)
-    dp.dump("tenhou_npz", tenhou_id)                 
+    dp.dump("tenhou_npz", tenhou_id)
+
+def proc_batch_tenhou_mjailog(prefix, update):
+    if len(prefix) < 4:
+        print("proc_batch_tenhou_mjailog prefix too short")
+        return
+    target = ""
+    if len(prefix) <= 8:
+        target = "tenhou_mjailog/" + prefix[:4] + "/" + prefix + "*/*.json"
+    else:
+        target = "tenhou_mjailog/" + prefix[:4] + "/" + prefix[:8] + "/" + prefix + "*.json"
+
+    file_list = glob.glob(target)
+    for file_name in file_list:
+        file_name = file_name.replace('\\', '/')
+        tenhou_id = file_name.split('/')[-1].split('.')[0]
+
+        if not update:
+            discard_path = pathlib.Path("tenhou_npz/discard/" + tenhou_id[:4] + "/" + tenhou_id[:8] + "/discard_" + tenhou_id + ".npz")
+            if discard_path.is_file():
+                continue
+
+        print("process:", tenhou_id)
+        proc_tenhou_mjailog(tenhou_id)  
     

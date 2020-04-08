@@ -304,10 +304,13 @@ def confirm_end_kyoku():
 
 def main(args):
     if args.dump_feature_tenhou:
-        if args.tenhou_id == None:
+        if args.tenhou_id != None:
+            proc_tenhou_mjailog(args.tenhou_id)
+        elif args.prefix != None:
+            proc_batch_tenhou_mjailog(args.prefix, args.update)
+        else:
             print("please specify tenhou_id")
             return
-        proc_tenhou_mjailog(args.tenhou_id)
     elif args.dump_feature:
         if args.out_dir == None:
             print("please specify out_dir")
@@ -335,5 +338,7 @@ if __name__ == '__main__':
     parser.add_argument('--out_dir')
     parser.add_argument('--dump_feature_tenhou', action='store_true')
     parser.add_argument('--tenhou_id')
+    parser.add_argument('--prefix')
+    parser.add_argument('--update', action='store_true')
     args = parser.parse_args()
     main(args)

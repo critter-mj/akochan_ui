@@ -491,7 +491,8 @@ class Game_State:
 
     def to_numpy(self, my_pid):
         # my_pid is 0,1,2,3
-        ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
+        #ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
+        ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(True) for i in range(4)])
         return ps
 
 def get_game_state_start_kyoku(action_json_dict):
