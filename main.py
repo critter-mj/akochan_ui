@@ -6,6 +6,7 @@ import argparse
 
 from lib.util import *
 from lib.mjtypes import *
+from lib.tenhou_convlog import *
 from lib.data_proc import *
 
 class UI_State(IntEnum):
@@ -303,7 +304,12 @@ def confirm_end_kyoku():
     gs.loop({})
 
 def main(args):
-    if args.dump_feature_tenhou:
+    if args.tenhou_convlog:
+        if args.year != None:
+            proc_year(args.year)
+        else:
+            print("please specify year")
+    elif args.dump_feature_tenhou:
         if args.tenhou_id != None:
             proc_tenhou_mjailog(args.tenhou_id)
         elif args.prefix != None:
@@ -333,6 +339,8 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--tenhou_convlog', action='store_true')
+    parser.add_argument('--year')
     parser.add_argument('--dump_feature', action='store_true')
     parser.add_argument('--file_path')
     parser.add_argument('--out_dir')
