@@ -33,10 +33,20 @@ and input random seed (non-negative integer).
     cd akochan-reviewer
     cargo build
 ```
-4. Run  
+4. Run. Output will be saved in tenhou_mjailog directory.
 ```
     python main.py --tenhou_convlog --year 20XX
-``` 
+```
+
+## Dump feature for supervised learning
+```
+    python main.py --dump_feature_tenhou --prefix <prefix_str>
+```
+<prefix_str> is prefix of json filename in tenhou_mjailog (for example 2018, 20180104, 2018010400gm-00a9).
+Note that system.exe from akochan, and converted mjai-log of Tenhou is required.
+When you run with option --update, old output is updated.
+Output files are saved in tenhou_npz directory.
+
 ## Used materials
 
 Images : https://majandofu.com/mahjong-images
