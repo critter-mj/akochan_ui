@@ -6,7 +6,7 @@ import argparse
 
 from lib.util import *
 from lib.mjtypes import *
-from data_proc import *
+from lib.data_proc import *
 
 class UI_State(IntEnum):
     UI_DEFAULT = 0 # デフォルト
