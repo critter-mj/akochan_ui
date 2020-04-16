@@ -344,12 +344,12 @@ class Player_State:
 
     def to_numpy_kawa(self):
         length = 20
-        ret = np.zeros((length + 1, 34), dtype=np.int)
+        ret = np.zeros((length*2, 34), dtype=np.int)
         for i in range(min(len(self.kawa),length)):
             hai = get_hai34(self.kawa[i].hai)
-            ret[i][hai] = 1
+            ret[i*2][hai] = 1
             if self.kawa[i].is_reach:
-                ret[length][hai] = 1
+                ret[i*2+1][hai] = 1
         return ret
 
     def to_numpy_tehai(self):
