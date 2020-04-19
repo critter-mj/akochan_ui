@@ -1,6 +1,7 @@
 import pathlib
 import glob
 import subprocess
+import json
 
 from .util import *
 from .mjtypes import *
@@ -36,7 +37,7 @@ class Data_Processor:
         c = subprocess.check_output(cmd.split()).decode('utf-8').rstrip()
         return json.loads(c)
 
-    def process_record(self, game_record):
+    def process_record(self, game_record, legal_actions_all):
         game_state = get_game_state_start_kyoku(json.loads(INITIAL_START_KYOKU))
         current_record = []
         for i, action in enumerate(game_record):
@@ -58,8 +59,7 @@ class Data_Processor:
                     self.y_discard.append(y)
             
             if action["type"] == "tsumo" or action["type"] == "dahai":
-                legal_actions = self.get_legal_moves(current_record)
-                for legal_action in legal_actions:
+                for legal_action in legal_actions_all[i]:
                     if legal_action["type"] == "chi":
                         if ((game_record[i+1]["type"] == "hora" and game_record[i+1]["actor"] != legal_action["actor"]) or
                             (game_record[i+1]["type"] == "pon" and game_record[i+1]["actor"] != legal_action["actor"]) or
@@ -114,8 +114,12 @@ class Data_Processor:
 
 def proc_tenhou_mjailog(tenhou_id):
     dp = Data_Processor()
-    game_record = read_log_json("tenhou_mjailog/" + tenhou_id[:4] + "/" + tenhou_id[:8] + "/" + tenhou_id + ".json")
-    dp.process_record(game_record)
+    log_path_str = "tenhou_mjailog/" + tenhou_id[:4] + "/" + tenhou_id[:8] + "/" + tenhou_id + ".json"
+    game_record = read_log_json(log_path_str)
+    cmd = "./system.exe legal_action_log_all " + log_path_str
+    c = subprocess.check_output(cmd.split()).decode('utf-8').rstrip()
+    legal_actions_all = json.loads(c)
+    dp.process_record(game_record, legal_actions_all)
     dp.dump("tenhou_npz", tenhou_id)
 
 def proc_batch_tenhou_mjailog(prefix, update):
