@@ -39,14 +39,11 @@ class Data_Processor:
 
     def process_record(self, game_record, legal_actions_all):
         game_state = get_game_state_start_kyoku(json.loads(INITIAL_START_KYOKU))
-        current_record = []
         for i, action in enumerate(game_record):
             if action["type"] == "start_kyoku":
                 game_state = get_game_state_start_kyoku(action)
-                current_record = [current_record[0]]
             else:
                 game_state.go_next_state(action)
-            current_record.append(action)
             if action["type"] == "tsumo" or action["type"] == "chi" or action["type"] == "pon":
                 if game_record[i+1]["type"] == "dahai" or game_record[i+1]["type"] == "reach":
                     x = game_state.to_numpy(action["actor"])
