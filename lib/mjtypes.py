@@ -611,11 +611,9 @@ def mask_action(action_json, view_pid):
                 ret["tehais"][pid] = ["?" for i in range(13)]
     return ret
 
-
-
 def field_label_str(game_state):
     ret = "bakaze:" + kaze_int_to_str(game_state.bakaze) + "  kyoku:" + str(game_state.kyoku) + "\n"
-    ret += "remain:" + str(70-game_state.total_tsumo_num)
+    ret += "remain:" + str(84-game_state.total_tsumo_num)
     return ret 
 
 def player_label_str(name, player_state):
