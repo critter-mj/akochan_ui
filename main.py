@@ -329,8 +329,11 @@ def main(args):
         if args.file_path != None:
             dp = Data_Processor()
             game_record = read_log_json(args.file_path)
-            dp.process_record(game_record)
-            dp.dump(args.out_dir, 0)
+            cmd = "./system.exe legal_action_log_all " + args.file_path
+            c = subprocess.check_output(cmd.split()).decode('utf-8').rstrip()
+            legal_actions_all = json.loads(c)
+            dp.process_record(game_record, legal_actions_all)
+            dp.dump_normal(args.out_dir, args.file_path.split('/')[-1].split('.')[0])
         else:
             print("please specify a file")
     else:

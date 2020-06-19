@@ -109,6 +109,19 @@ class Data_Processor:
         self.dump_child(dir_path, tenhou_id, "ankan", self.x_ankan, self.y_ankan)
         self.dump_child(dir_path, tenhou_id, "reach", self.x_reach, self.y_reach)
 
+    def dump_normal_child(self, dir_path, name_str, action_type, X, Y):
+        if 0 < len(Y):
+            out_dir_pathstr = dir_path + "/" + action_type + "/" + name_str
+            out_dir = pathlib.Path(out_dir_pathstr)
+            if not out_dir.is_dir():
+                out_dir.mkdir(parents=True)
+            np.savez_compressed(out_dir_pathstr + "/" + action_type + "_" + name_str, X, Y)
+            X.clear()
+            Y.clear()
+
+    def dump_normal(self, dir_path, name_str):
+        self.dump_normal_child(dir_path, name_str, "discard", self.x_discard, self.y_discard) 
+
 def proc_tenhou_mjailog(tenhou_id):
     dp = Data_Processor()
     log_path_str = "tenhou_mjailog/" + tenhou_id[:4] + "/" + tenhou_id[:8] + "/" + tenhou_id + ".json"
