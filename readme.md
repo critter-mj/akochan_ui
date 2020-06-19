@@ -38,7 +38,7 @@ and input random seed (non-negative integer).
     python main.py --tenhou_convlog --year 20XX
 ```
 
-## Dump feature for supervised learning
+## Dump feature for supervised learning (from converted Tenhou-log)
 ```
     python main.py --dump_feature_tenhou --prefix <prefix_str>
 ```
@@ -46,6 +46,13 @@ and input random seed (non-negative integer).
 Note that system.exe from akochan, and converted mjai-log of Tenhou is required.
 When you run with option --update, old output is updated.
 Output files are saved in tenhou_npz directory.
+
+## Dump feature for supervised learning (from own log)
+```
+    python main.py --dump_feature --out_dir <outdir_str> --file_path <filepath_str>
+```
+Note that system.exe from akochan is required.
+Output files are saved in <outdir_str> directory.
 
 ## Used materials
 
