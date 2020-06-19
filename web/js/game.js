@@ -134,12 +134,6 @@ function show_end_kyoku(action_json) {
     hora_str = '<div>';
     if (action_json["type"] == "hora") {
         hora_str += action_json["fan"] + ' 翻 ' + action_json["fu"] + ' 符 ';
-        if ("uradora_marker" in action_json) {
-            hora_str += ' 裏ドラ表示: ';
-            for (var i = 0; i < action_json["uradora_marker"].length; i++) {
-                hora_str += '<img class="pai" style="display: inline;" src="img/' + action_json["uradora_marker"][i] + '_0.png">';
-            }
-        }
     }
     hora_str += '</div>';
 

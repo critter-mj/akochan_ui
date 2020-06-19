@@ -155,18 +155,8 @@ function dump_kyoku_info(json) {
     return ret; 
 }
 
-function dump_wanpai(dora_marker) {
+function dump_wanpai() {
     var ret = '<div class="wanpais-container">\n';
-    ret += '<img class="repeated" id="wanpais">';
-    for (var i = 0; i < 2; i++) {
-        ret += hai_img_tag('0');
-    }
-    for (var i = 0; i < dora_marker.length; i++) {
-        ret += hai_img_tag(dora_marker[i]);
-    }
-    for (var i = 0; i < 4 - dora_marker.length; i++) {
-        ret += hai_img_tag('0');
-    }
     ret += '</div>\n';
     return ret;  
 }
@@ -187,7 +177,6 @@ function dump_board(json, view_pid) {
         ret += dump_player(json["player_state"][(view_pid + pid) % 4], pid);
     }
     ret += dump_kyoku_info(json);
-    ret += dump_wanpai(json["dora_marker"]);
     ret += dump_num_info(json);
     return ret;
 }

@@ -368,14 +368,11 @@ class Player_State:
             return visible
         
 class Game_State:
-    def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, dora_marker, tehai_array):
+    def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, tehai_array):
         self.bakaze = bakaze
         self.kyoku = kyoku
         self.honba = honba
         self.kyotaku = kyotaku
-        self.dora_marker = []
-        if is_valid_hai(dora_marker):
-            self.dora_marker.append(dora_marker)
         self.player_state = [Player_State(scores[i], (i - oya + 4) % 4, tehai_array[i]) for i in range (4)]
         self.total_tsumo_num = 0
 
@@ -386,9 +383,7 @@ class Game_State:
                     self.player_state[i].tehai[self.player_state[i].prev_tsumo] += 1
                     self.player_state[i].prev_tsumo = 0
 
-        if action_json["type"] == "dora":
-            self.dora_marker.append(hai_str_to_int(action_json["dora_marker"]))
-        elif action_json["type"] == "tsumo":
+        if action_json["type"] == "tsumo":
             hai = hai_str_to_int(action_json["pai"])
             self.total_tsumo_num += 1
             if is_valid_hai(hai):
@@ -481,7 +476,6 @@ class Game_State:
             "kyoku": self.kyoku,
             "honba": self.honba,
             "kyotaku": self.kyotaku,
-            "dora_marker": [hai_int_to_str(d) for d in self.dora_marker],
             "player_state": [self.player_state[pid].to_json(
                 pid == view_pid or view_pid == -1,
                 "Player" + str(pid)
@@ -509,10 +503,9 @@ def get_game_state_start_kyoku(action_json_dict):
                       kyotaku = action_json_dict["kyotaku"],
                       scores = action_json_dict["scores"],
                       oya = action_json_dict["oya"],
-                      dora_marker = hai_str_to_int(action_json_dict["dora_marker"]),
                       tehai_array = tehai_array)
 
-INITIAL_START_KYOKU = '{ "type": "start_kyoku", "bakaze": "E", "kyoku": 1, "honba": 0, "kyotaku": 0, "scores": [25000, 25000, 25000, 25000], "oya": 0, "dora_marker": "?", "tehais": [[], [], [], []] }'
+INITIAL_START_KYOKU = '{ "type": "start_kyoku", "bakaze": "E", "kyoku": 1, "honba": 0, "kyotaku": 0, "scores": [25000, 25000, 25000, 25000], "oya": 0, "tehais": [[], [], [], []] }'
 
 
 #-- for ui ---#
