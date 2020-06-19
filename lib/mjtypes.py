@@ -368,11 +368,9 @@ class Player_State:
             return visible
         
 class Game_State:
-    def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, tehai_array):
+    def __init__(self, bakaze, kyoku, scores, oya, tehai_array):
         self.bakaze = bakaze
         self.kyoku = kyoku
-        self.honba = honba
-        self.kyotaku = kyotaku
         self.player_state = [Player_State(scores[i], (i - oya + 4) % 4, tehai_array[i]) for i in range (4)]
         self.total_tsumo_num = 0
 
@@ -390,14 +388,6 @@ class Game_State:
                 actor = action_json["actor"]
                 #self.player_state[actor].tehai[hai] += 1
                 self.player_state[actor].prev_tsumo = hai
-        elif action_json["type"] == "reach":
-            actor = action_json["actor"]
-            self.player_state[actor].reach_declared = True
-        elif action_json["type"] == "reach_accepted":
-            actor = action_json["actor"]
-            self.player_state[actor].reach_accepted = True
-            self.player_state[actor].score -= 1000
-            self.kyotaku += 1
         elif action_json["type"] == "dahai":
             hai = hai_str_to_int(action_json["pai"])
             actor = action_json["actor"]
@@ -474,8 +464,6 @@ class Game_State:
         return {
             "bakaze": kaze_int_to_str(self.bakaze),
             "kyoku": self.kyoku,
-            "honba": self.honba,
-            "kyotaku": self.kyotaku,
             "player_state": [self.player_state[pid].to_json(
                 pid == view_pid or view_pid == -1,
                 "Player" + str(pid)
@@ -499,13 +487,11 @@ def get_game_state_start_kyoku(action_json_dict):
 
     return Game_State(bakaze = kaze_str_to_int(action_json_dict["bakaze"]),
                       kyoku = action_json_dict["kyoku"],
-                      honba = action_json_dict["honba"],
-                      kyotaku = action_json_dict["kyotaku"],
                       scores = action_json_dict["scores"],
                       oya = action_json_dict["oya"],
                       tehai_array = tehai_array)
 
-INITIAL_START_KYOKU = '{ "type": "start_kyoku", "bakaze": "E", "kyoku": 1, "honba": 0, "kyotaku": 0, "scores": [25000, 25000, 25000, 25000], "oya": 0, "tehais": [[], [], [], []] }'
+INITIAL_START_KYOKU = '{ "type": "start_kyoku", "bakaze": "E", "kyoku": 1, "scores": [25000, 25000, 25000, 25000], "oya": 0, "tehais": [[], [], [], []] }'
 
 
 #-- for ui ---#
@@ -628,8 +614,8 @@ def mask_action(action_json, view_pid):
 
 
 def field_label_str(game_state):
-    ret = "bakaze:" + kaze_int_to_str(game_state.bakaze) + "  kyoku:" + str(game_state.kyoku) + "  honba:" + str(game_state.honba) + "\n"
-    ret += "kyotaku:" + str(game_state.kyotaku) + "  remain:" + str(70-game_state.total_tsumo_num)
+    ret = "bakaze:" + kaze_int_to_str(game_state.bakaze) + "  kyoku:" + str(game_state.kyoku) + "\n"
+    ret += "remain:" + str(70-game_state.total_tsumo_num)
     return ret 
 
 def player_label_str(name, player_state):

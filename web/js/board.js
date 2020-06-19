@@ -150,7 +150,7 @@ function dump_kyoku_info(json) {
     } else if (json["bakaze"] == 'N') {
         ret += '北';
     }
-    ret += ' ' + String(json["kyoku"]) + ' 局 ' + String(json["honba"]) + ' 本場';
+    ret += ' ' + String(json["kyoku"]) + ' 局';
     ret += '</span></div>';
     return ret; 
 }
@@ -163,8 +163,6 @@ function dump_wanpai() {
 
 function dump_num_info(json) {
     var ret = '<div class="num_info-container">\n';
-    ret += '<img class="kyotaku" style="display: inline;" src="img/Reach.png">';
-    ret += '<span class="onboard_string">×  ' + String(json["kyotaku"]) + '  </span>'
     ret += '<img class="remain_icon" style="display: inline;" src="img/0_0.png">';
     ret += '<span class="onboard_string">×  ' + String(70 - json["total_tsumo_num"]) + '</span>'
     ret += '</div>\n';
@@ -228,18 +226,6 @@ function update_board(state_json, view_pid) {
         let kyoku_info_new = doc_new.getElementsByClassName("kyoku-info-container")[0];
         if (kyoku_info_old.innerHTML != kyoku_info_new.innerHTML) {
             kyoku_info_old.innerHTML = kyoku_info_new.innerHTML;
-        }
-
-        let wanpai_old = document.getElementsByClassName("wanpais-container")[0];
-        let wanpai_new = doc_new.getElementsByClassName("wanpais-container")[0];
-        for (var i = 0; i < wanpai_old.children.length; i++) {
-            if (wanpai_old.children[i].outerHTML != wanpai_new.children[i].outerHTML) {
-                wanpai_old.children[i].outerHTML = wanpai_new.children[i].outerHTML;
-            }
-        }
-
-        if (wanpai_old.innerHTML != wanpai_new.innerHTML) {
-            wanpai_old.innerHTML = wanpai_new.innerHTML;
         }
 
         let num_info_old = document.getElementsByClassName("num_info-container")[0];
