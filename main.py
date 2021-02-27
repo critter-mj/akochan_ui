@@ -310,10 +310,11 @@ def main(args):
         else:
             print("please specify year")
     elif args.dump_feature_tenhou:
+        input_logdir = "../tenhou_logjson"
         if args.tenhou_id != None:
-            proc_tenhou_mjailog(args.tenhou_id)
+            proc_tenhou_mjailog(input_logdir, args.tenhou_id)
         elif args.prefix != None:
-            proc_batch_tenhou_mjailog(args.prefix, args.update)
+            proc_batch_tenhou_mjailog(input_logdir, args.prefix, args.update)
         else:
             print("please specify tenhou_id")
             return
