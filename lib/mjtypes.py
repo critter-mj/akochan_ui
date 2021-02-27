@@ -120,79 +120,79 @@ def hai_str_to_int(hai_str):
         assert False, "hai_str_to_int_err"
 
 def hai_int_to_str(hai_int):
-    if hai_int == 1: 
+    if hai_int == 1:
         return "1m"
-    elif hai_int == 2: 
+    elif hai_int == 2:
         return "2m"
-    elif hai_int == 3: 
+    elif hai_int == 3:
         return "3m"
-    elif hai_int == 4: 
+    elif hai_int == 4:
         return "4m"
-    elif hai_int == 5: 
+    elif hai_int == 5:
         return "5m"
-    elif hai_int == 6: 
+    elif hai_int == 6:
         return "6m"
-    elif hai_int == 7: 
+    elif hai_int == 7:
         return "7m"
-    elif hai_int == 8: 
+    elif hai_int == 8:
         return "8m"
-    elif hai_int == 9: 
+    elif hai_int == 9:
         return "9m"
-    elif hai_int == 10: 
+    elif hai_int == 10:
         return "5mr"
-    elif hai_int == 11: 
+    elif hai_int == 11:
         return "1p"
-    elif hai_int == 12: 
+    elif hai_int == 12:
         return "2p"
-    elif hai_int == 13: 
+    elif hai_int == 13:
         return "3p"
-    elif hai_int == 14: 
+    elif hai_int == 14:
         return "4p"
-    elif hai_int == 15: 
+    elif hai_int == 15:
         return "5p"
-    elif hai_int == 16: 
+    elif hai_int == 16:
         return "6p"
-    elif hai_int == 17: 
+    elif hai_int == 17:
         return "7p"
-    elif hai_int == 18: 
+    elif hai_int == 18:
         return "8p"
-    elif hai_int == 19: 
+    elif hai_int == 19:
         return "9p"
-    elif hai_int == 20: 
+    elif hai_int == 20:
         return "5pr"
-    elif hai_int == 21: 
+    elif hai_int == 21:
         return "1s"
-    elif hai_int == 22: 
+    elif hai_int == 22:
         return "2s"
-    elif hai_int == 23: 
+    elif hai_int == 23:
         return "3s"
-    elif hai_int == 24: 
+    elif hai_int == 24:
         return "4s"
-    elif hai_int == 25: 
+    elif hai_int == 25:
         return "5s"
-    elif hai_int == 26: 
+    elif hai_int == 26:
         return "6s"
-    elif hai_int == 27: 
+    elif hai_int == 27:
         return "7s"
-    elif hai_int == 28: 
+    elif hai_int == 28:
         return "8s"
-    elif hai_int == 29: 
+    elif hai_int == 29:
         return "9s"
-    elif hai_int == 30: 
+    elif hai_int == 30:
         return "5sr"
-    elif hai_int == 31: 
+    elif hai_int == 31:
         return "E"
-    elif hai_int == 32: 
+    elif hai_int == 32:
         return "S"
-    elif hai_int == 33: 
+    elif hai_int == 33:
         return "W"
-    elif hai_int == 34: 
+    elif hai_int == 34:
         return "N"
-    elif hai_int == 35: 
+    elif hai_int == 35:
         return "P"
-    elif hai_int == 36: 
+    elif hai_int == 36:
         return "F"
-    elif hai_int == 37: 
+    elif hai_int == 37:
         return "C"
     else:
         assert False, "hai_int_to_str_error"
@@ -298,10 +298,11 @@ class Sutehai:
         }
 
 class Player_State:
-    def __init__(self, score, jikaze, tehai):
+    def __init__(self, score, jikaze, tehai, all_tehai):
         self.score = score
         self.jikaze = jikaze
         self.tehai = tehai
+        self.all_tehai = all_tehai
         self.fuuro = []
         self.kawa = []
         self.reach_declared = False
@@ -360,15 +361,33 @@ class Player_State:
                 ret[i][hai] = 1
         return ret
 
+    def to_numpy_jikaze(self):
+	    ret = np.zeros((4,34), dtype=np.int)
+	    for i in range(34):
+	        ret[self.jikaze][i] = 1
+	    return ret
+
+    def to_numpy_score(self):
+        ret = np.zeros((71,34), dtype=np.int)
+        if self.score < 0:
+            m = 0
+        elif self.score < 70000:
+            m = self.score // 1000
+        else:
+            m = 70
+        for i in range(34):
+            ret[m][i] = 1
+        return ret
+
     def to_numpy(self, tehai_flag):
-        visible = np.concatenate([self.to_numpy_fuuro(), self.to_numpy_kawa()])
+        visible = np.concatenate([self.to_numpy_fuuro(), self.to_numpy_jikaze(), self.to_numpy_kawa(), self.to_numpy_score()])
         if tehai_flag:
             return np.concatenate([self.to_numpy_tehai(), visible])
         else:
             return visible
-        
+
 class Game_State:
-    def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, dora_marker, tehai_array):
+    def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, dora_marker, tehai_array, all_tehai_array, nokori_array):
         self.bakaze = bakaze
         self.kyoku = kyoku
         self.honba = honba
@@ -376,25 +395,30 @@ class Game_State:
         self.dora_marker = []
         if is_valid_hai(dora_marker):
             self.dora_marker.append(dora_marker)
-        self.player_state = [Player_State(scores[i], (i - oya + 4) % 4, tehai_array[i]) for i in range (4)]
+        self.player_state = [Player_State(scores[i], (i - oya + 4) % 4, tehai_array[i], all_tehai_array[i]) for i in range (4)]
+        self.nokori_array = nokori_array
         self.total_tsumo_num = 0
 
     def go_next_state(self, action_json):
+        """
         if action_json["type"] != "tsumo" and action_json["type"] != "reach" and action_json["type"] != "hora":
             for i in range(4):
                 if 0 < self.player_state[i].prev_tsumo:
                     self.player_state[i].tehai[self.player_state[i].prev_tsumo] += 1
                     self.player_state[i].prev_tsumo = 0
+        """
 
         if action_json["type"] == "dora":
             self.dora_marker.append(hai_str_to_int(action_json["dora_marker"]))
+            self.nokori_array[hai_str_to_int(action_json["dora_marker"])] -= 1
         elif action_json["type"] == "tsumo":
             hai = hai_str_to_int(action_json["pai"])
             self.total_tsumo_num += 1
             if is_valid_hai(hai):
                 actor = action_json["actor"]
-                #self.player_state[actor].tehai[hai] += 1
-                self.player_state[actor].prev_tsumo = hai
+                self.player_state[actor].tehai[hai] += 1
+                self.player_state[actor].all_tehai[hai] += 1
+                #self.player_state[actor].prev_tsumo = hai
         elif action_json["type"] == "reach":
             actor = action_json["actor"]
             self.player_state[actor].reach_declared = True
@@ -411,12 +435,18 @@ class Game_State:
             is_reach = self.player_state[actor].reach_declared and not self.player_state[actor].reach_accepted
             self.player_state[actor].kawa.append(Sutehai(hai, tsumogiri, is_reach))
             self.player_state[actor].tehai[hai] -= 1
+            self.player_state[actor].all_tehai[hai] -= 1
+            self.nokori_array[hai] -= 1
         elif action_json["type"] == "chi":
             actor = action_json["actor"]
             target = action_json["target"]
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             hai = hai_str_to_int(action_json["pai"])
+            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
+            self.nokori_array[hai] -= 1
+            self.player_state[actor].all_tehai[hai] += 1
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
             consumed.append(hai_str_to_int(action_json["consumed"][1]))
@@ -430,6 +460,10 @@ class Game_State:
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             hai = hai_str_to_int(action_json["pai"])
+            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
+            self.player_state[actor].all_tehai[hai] += 1
+            self.nokori_array[hai] -= 1
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
             consumed.append(hai_str_to_int(action_json["consumed"][1]))
@@ -443,6 +477,9 @@ class Game_State:
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][2])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][2])] -= 1
             hai = hai_str_to_int(action_json["pai"])
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
@@ -458,6 +495,11 @@ class Game_State:
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][2])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][3])] -= 1
+            self.player_state[actor].all_tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][2])] -= 1
+            self.nokori_array[hai_str_to_int(action_json["consumed"][3])] -= 1
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
             consumed.append(hai_str_to_int(action_json["consumed"][1]))
@@ -489,19 +531,99 @@ class Game_State:
             "total_tsumo_num": self.total_tsumo_num
         }
 
+    def to_numpy_bakaze(self):
+	    ret = np.zeros((4,34), dtype=np.int)
+	    for i in range(34):
+	        ret[self.bakaze][i] = 1
+	    return ret
+
+    def to_numpy_kyoku(self):
+	    ret = np.zeros((4,34), dtype=np.int)
+	    for i in range(34):
+	        ret[self.kyoku-1][i] = 1
+	    return ret
+
+    def to_numpy_honba(self):
+	    ret = np.zeros((10,34), dtype=np.int)
+	    if self.honba < 9:
+	        for i in range(34):
+		        ret[self.honba][i] = 1
+	    else:
+	        for i in range(34):
+		        ret[9][i] = 1
+	    return ret
+
+    def to_numpy_kyotaku(self):
+	    ret = np.zeros((10,34), dtype=np.int)
+	    if self.kyotaku < 9:
+	        for i in range(34):
+		        ret[self.kyotaku][i] = 1
+	    else:
+	        for i in range(34):
+		        ret[9][i] = 1
+	    return ret
+
+    def to_numpy_dora(self):
+        tmp = [0 for i in range(38)]
+        for d in self.dora_marker:
+            tmp[get_hai34(d)] += 1
+        ret = np.zeros((4, 34), dtype=np.int)
+        for hai in range(34):
+            for i in range(tmp[hai]):
+                ret[i][hai] = 1
+        return ret
+
     def to_numpy(self, my_pid):
         # my_pid is 0,1,2,3
-        #ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
-        ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(True) for i in range(4)])
-        return ps
+        ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
+        #ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(True) for i in range(4)])
+        ps2 = np.concatenate([ps, self.to_numpy_bakaze(), self.to_numpy_kyoku(), self.to_numpy_honba(), self.to_numpy_kyotaku(), self.to_numpy_dora()])
+        return ps2
+
+    def to_numpy_fuuro(self, my_pid, target_hai, consumed_hai):
+        # my_pid is 0,1,2,3
+        ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
+        #ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(True) for i in range(4)])
+        ret = np.zeros((4,34), dtype=np.int)
+        tmp = [0 for i in range(34)]
+        for c in consumed_hai:
+            tmp[get_hai34(hai_str_to_int(c))] += 1
+        ret[0][get_hai34(hai_str_to_int(target_hai))] = 1
+        for hai in range(34):
+            for i in range(tmp[hai]):
+                ret[i+1][hai] = 1
+        #print(ret)
+        ps = np.concatenate([ps, ret])
+        ps2 = np.concatenate([ps, self.to_numpy_bakaze(), self.to_numpy_kyoku(), self.to_numpy_honba(), self.to_numpy_kyotaku(), self.to_numpy_dora()])
+        return ps2
+
+    def to_numpy_kan(self, kan_type, my_pid, consumed_hai):
+        # my_pid is 0,1,2,3
+        ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
+        #ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(True) for i in range(4)])
+        ret = np.zeros((4,34), dtype=np.int)
+        for i in range(4):
+            ret[i][get_hai34(hai_str_to_int(consumed_hai[0]))] = 1
+        #print(ret)
+        kan_t = np.zeros((3,34), dtype=np.int)
+        for i in range(34):
+            kan_t[kan_type][i] = 1
+        ps = np.concatenate([ps, ret, kan_t])
+        ps2 = np.concatenate([ps, self.to_numpy_bakaze(), self.to_numpy_kyoku(), self.to_numpy_honba(), self.to_numpy_kyotaku(), self.to_numpy_dora()])
 
 def get_game_state_start_kyoku(action_json_dict):
     assert action_json_dict["type"] == "start_kyoku", "get_game_state_start_kyoku_error"
-    
+
     tehai_array = [[0 for j in range(38)] for i in range(4)]
+    all_tehai_array = [[0 for j in range(38)] for i in range(4)]
+    nokori_array = [4 for j in range(38)]
+    nokori_array[0] = 0
+
     for i in range(4):
         for hai_str in action_json_dict["tehais"][i]:
             tehai_array[i][hai_str_to_int(hai_str)] += 1
+            all_tehai_array[i][hai_str_to_int(hai_str)] += 1
+            nokori_array[hai_str_to_int(hai_str)] -= 1
 
     return Game_State(bakaze = kaze_str_to_int(action_json_dict["bakaze"]),
                       kyoku = action_json_dict["kyoku"],
@@ -510,7 +632,9 @@ def get_game_state_start_kyoku(action_json_dict):
                       scores = action_json_dict["scores"],
                       oya = action_json_dict["oya"],
                       dora_marker = hai_str_to_int(action_json_dict["dora_marker"]),
-                      tehai_array = tehai_array)
+                      tehai_array = tehai_array,
+                      all_tehai_array = all_tehai_array,
+                      nokori_array = nokori_array)
 
 INITIAL_START_KYOKU = '{ "type": "start_kyoku", "bakaze": "E", "kyoku": 1, "honba": 0, "kyotaku": 0, "scores": [25000, 25000, 25000, 25000], "oya": 0, "dora_marker": "?", "tehais": [[], [], [], []] }'
 
@@ -632,12 +756,10 @@ def mask_action(action_json, view_pid):
                 ret["tehais"][pid] = ["?" for i in range(13)]
     return ret
 
-
-
 def field_label_str(game_state):
     ret = "bakaze:" + kaze_int_to_str(game_state.bakaze) + "  kyoku:" + str(game_state.kyoku) + "  honba:" + str(game_state.honba) + "\n"
     ret += "kyotaku:" + str(game_state.kyotaku) + "  remain:" + str(70-game_state.total_tsumo_num)
-    return ret 
+    return ret
 
 def player_label_str(name, player_state):
     ret = name + "\n"
