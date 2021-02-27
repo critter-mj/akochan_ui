@@ -298,11 +298,10 @@ class Sutehai:
         }
 
 class Player_State:
-    def __init__(self, score, jikaze, tehai, all_tehai):
+    def __init__(self, score, jikaze, tehai):
         self.score = score
         self.jikaze = jikaze
         self.tehai = tehai
-        self.all_tehai = all_tehai
         self.fuuro = []
         self.kawa = []
         self.reach_declared = False
@@ -355,6 +354,8 @@ class Player_State:
 
     def to_numpy_tehai(self):
         tmp = get_hai34_array(self.tehai)
+        if self.prev_tsumo != 0:
+            tmp[get_hai34(self.prev_tsumo)] += 1
         ret = np.zeros((4, 34), dtype=np.int)
         for hai in range(34):
             for i in range(tmp[hai]):
@@ -387,7 +388,7 @@ class Player_State:
             return visible
 
 class Game_State:
-    def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, dora_marker, tehai_array, all_tehai_array, nokori_array):
+    def __init__(self, bakaze, kyoku, honba, kyotaku, scores, oya, dora_marker, tehai_array):
         self.bakaze = bakaze
         self.kyoku = kyoku
         self.honba = honba
@@ -395,30 +396,25 @@ class Game_State:
         self.dora_marker = []
         if is_valid_hai(dora_marker):
             self.dora_marker.append(dora_marker)
-        self.player_state = [Player_State(scores[i], (i - oya + 4) % 4, tehai_array[i], all_tehai_array[i]) for i in range (4)]
-        self.nokori_array = nokori_array
+        self.player_state = [Player_State(scores[i], (i - oya + 4) % 4, tehai_array[i]) for i in range (4)]
         self.total_tsumo_num = 0
 
     def go_next_state(self, action_json):
-        """
         if action_json["type"] != "tsumo" and action_json["type"] != "reach" and action_json["type"] != "hora":
             for i in range(4):
                 if 0 < self.player_state[i].prev_tsumo:
                     self.player_state[i].tehai[self.player_state[i].prev_tsumo] += 1
                     self.player_state[i].prev_tsumo = 0
-        """
 
         if action_json["type"] == "dora":
             self.dora_marker.append(hai_str_to_int(action_json["dora_marker"]))
-            self.nokori_array[hai_str_to_int(action_json["dora_marker"])] -= 1
         elif action_json["type"] == "tsumo":
             hai = hai_str_to_int(action_json["pai"])
             self.total_tsumo_num += 1
             if is_valid_hai(hai):
                 actor = action_json["actor"]
-                self.player_state[actor].tehai[hai] += 1
-                self.player_state[actor].all_tehai[hai] += 1
-                #self.player_state[actor].prev_tsumo = hai
+                #self.player_state[actor].tehai[hai] += 1
+                self.player_state[actor].prev_tsumo = hai
         elif action_json["type"] == "reach":
             actor = action_json["actor"]
             self.player_state[actor].reach_declared = True
@@ -435,18 +431,12 @@ class Game_State:
             is_reach = self.player_state[actor].reach_declared and not self.player_state[actor].reach_accepted
             self.player_state[actor].kawa.append(Sutehai(hai, tsumogiri, is_reach))
             self.player_state[actor].tehai[hai] -= 1
-            self.player_state[actor].all_tehai[hai] -= 1
-            self.nokori_array[hai] -= 1
         elif action_json["type"] == "chi":
             actor = action_json["actor"]
             target = action_json["target"]
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             hai = hai_str_to_int(action_json["pai"])
-            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
-            self.nokori_array[hai] -= 1
-            self.player_state[actor].all_tehai[hai] += 1
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
             consumed.append(hai_str_to_int(action_json["consumed"][1]))
@@ -460,10 +450,6 @@ class Game_State:
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             hai = hai_str_to_int(action_json["pai"])
-            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
-            self.player_state[actor].all_tehai[hai] += 1
-            self.nokori_array[hai] -= 1
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
             consumed.append(hai_str_to_int(action_json["consumed"][1]))
@@ -477,9 +463,6 @@ class Game_State:
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][2])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][2])] -= 1
             hai = hai_str_to_int(action_json["pai"])
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
@@ -495,11 +478,6 @@ class Game_State:
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][1])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][2])] -= 1
             self.player_state[actor].tehai[hai_str_to_int(action_json["consumed"][3])] -= 1
-            self.player_state[actor].all_tehai[hai_str_to_int(action_json["consumed"][0])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][0])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][1])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][2])] -= 1
-            self.nokori_array[hai_str_to_int(action_json["consumed"][3])] -= 1
             consumed = []
             consumed.append(hai_str_to_int(action_json["consumed"][0]))
             consumed.append(hai_str_to_int(action_json["consumed"][1]))
@@ -615,15 +593,10 @@ def get_game_state_start_kyoku(action_json_dict):
     assert action_json_dict["type"] == "start_kyoku", "get_game_state_start_kyoku_error"
 
     tehai_array = [[0 for j in range(38)] for i in range(4)]
-    all_tehai_array = [[0 for j in range(38)] for i in range(4)]
-    nokori_array = [4 for j in range(38)]
-    nokori_array[0] = 0
 
     for i in range(4):
         for hai_str in action_json_dict["tehais"][i]:
             tehai_array[i][hai_str_to_int(hai_str)] += 1
-            all_tehai_array[i][hai_str_to_int(hai_str)] += 1
-            nokori_array[hai_str_to_int(hai_str)] -= 1
 
     return Game_State(bakaze = kaze_str_to_int(action_json_dict["bakaze"]),
                       kyoku = action_json_dict["kyoku"],
@@ -632,9 +605,7 @@ def get_game_state_start_kyoku(action_json_dict):
                       scores = action_json_dict["scores"],
                       oya = action_json_dict["oya"],
                       dora_marker = hai_str_to_int(action_json_dict["dora_marker"]),
-                      tehai_array = tehai_array,
-                      all_tehai_array = all_tehai_array,
-                      nokori_array = nokori_array)
+                      tehai_array = tehai_array)
 
 INITIAL_START_KYOKU = '{ "type": "start_kyoku", "bakaze": "E", "kyoku": 1, "honba": 0, "kyotaku": 0, "scores": [25000, 25000, 25000, 25000], "oya": 0, "dora_marker": "?", "tehais": [[], [], [], []] }'
 
