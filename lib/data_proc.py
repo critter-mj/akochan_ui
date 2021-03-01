@@ -17,6 +17,7 @@ class Data_Processor:
         self.x_pon = []
         self.y_pon = []
 
+        """
         self.x_daiminkan = []
         self.y_daiminkan = []
 
@@ -25,6 +26,10 @@ class Data_Processor:
 
         self.x_ankan = []
         self.y_ankan = []
+        """
+
+        self.x_kan = []
+        self.y_kan = []
 
         self.x_reach = []
         self.y_reach = []
@@ -62,33 +67,50 @@ class Data_Processor:
                             (game_record[i+1]["type"] == "pon" and game_record[i+1]["actor"] != legal_action["actor"]) or
                             (game_record[i+1]["type"] == "daiminkan" and game_record[i+1]["actor"] != legal_action["actor"])):
                             continue
-                        x = game_state.to_numpy(legal_action["actor"])
+                        #x = game_state.to_numpy(legal_action["actor"])
+                        x = game_state.to_numpy_fuuro(legal_action["actor"], legal_action["pai"], legal_action["consumed"])
                         self.x_chi.append(x)
-                        self.y_chi.append(1 if legal_action == game_record[i+1] else 0)
+                        self.y_chi.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
                     if legal_action["type"] == "pon":
                         if game_record[i+1]["type"] == "hora" and game_record[i+1]["actor"] != legal_action["actor"]:
                             continue
-                        x = game_state.to_numpy(legal_action["actor"])
+                        #x = game_state.to_numpy(legal_action["actor"])
+                        x = game_state.to_numpy_fuuro(legal_action["actor"], legal_action["pai"], legal_action["consumed"])
                         self.x_pon.append(x)
-                        self.y_pon.append(1 if legal_action == game_record[i+1] else 0)
+                        self.y_pon.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
+                    """
                     if legal_action["type"] == "daiminkan":
                         if game_record[i+1]["type"] == "hora" and game_record[i+1]["actor"] != legal_action["actor"]:
                             continue
-                        x = game_state.to_numpy(legal_action["actor"])
+                        #x = game_state.to_numpy(legal_action["actor"])
+                        x = game_state.to_numpy_fuuro(legal_action["actor"], legal_action["pai"], legal_action["consumed"])
                         self.x_daiminkan.append(x)
-                        self.y_daiminkan.append(1 if legal_action == game_record[i+1] else 0)
+                        self.y_daiminkan.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
                     if legal_action["type"] == "kakan":
-                        x = game_state.to_numpy(legal_action["actor"])
+                        #x = game_state.to_numpy(legal_action["actor"])
+                        x = game_state.to_numpy_fuuro(legal_action["actor"], legal_action["pai"], legal_action["consumed"])
                         self.x_kakan.append(x)
-                        self.y_kakan.append(1 if legal_action == game_record[i+1] else 0)
+                        self.y_kakan.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
                     if legal_action["type"] == "ankan":
-                        x = game_state.to_numpy(legal_action["actor"])
+                        #x = game_state.to_numpy(legal_action["actor"])
+                        x = game_state.to_numpy_kan(legal_action["actor"], legal_action["consumed"])
                         self.x_ankan.append(x)
-                        self.y_ankan.append(1 if legal_action == game_record[i+1] else 0)
+                        self.y_ankan.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
+                    """
                     if legal_action["type"] == "reach":
                         x = game_state.to_numpy(legal_action["actor"])
                         self.x_reach.append(x)
-                        self.y_reach.append(1 if legal_action == game_record[i+1] else 0)
+                        self.y_reach.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
+                    if  legal_action["type"] == "kakan" or legal_action["type"] == "ankan" or legal_action["type"] == "daiminkan":
+                        if legal_action["type"] == "daiminkan":
+                            kan_type = 0
+                        elif legal_action["type"] == "kakan":
+                            kan_type = 1
+                        else:
+                            kan_type = 2
+                        x = game_state.to_numpy_kan(kan_type, legal_action["actor"], legal_action["consumed"])
+                        self.x_kan.append(x)
+                        self.y_kan.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
 
     def dump_child(self, dir_path, tenhou_id, action_type, X, Y):
         if 0 < len(Y):
@@ -104,9 +126,10 @@ class Data_Processor:
         self.dump_child(dir_path, tenhou_id, "discard", self.x_discard, self.y_discard)
         self.dump_child(dir_path, tenhou_id, "chi", self.x_chi, self.y_chi)
         self.dump_child(dir_path, tenhou_id, "pon", self.x_pon, self.y_pon)
-        self.dump_child(dir_path, tenhou_id, "daiminkan", self.x_daiminkan, self.y_daiminkan)
-        self.dump_child(dir_path, tenhou_id, "kakan", self.x_kakan, self.y_kakan)
-        self.dump_child(dir_path, tenhou_id, "ankan", self.x_ankan, self.y_ankan)
+        self.dump_child(dir_path, tenhou_id, "kan", self.x_kan, self.y_kan)
+        #self.dump_child(dir_path, tenhou_id, "daiminkan", self.x_daiminkan, self.y_daiminkan)
+        #self.dump_child(dir_path, tenhou_id, "kakan", self.x_kakan, self.y_kakan)
+        #self.dump_child(dir_path, tenhou_id, "ankan", self.x_ankan, self.y_ankan)
         self.dump_child(dir_path, tenhou_id, "reach", self.x_reach, self.y_reach)
 
     def dump_normal_child(self, dir_path, name_str, action_type, X, Y):
