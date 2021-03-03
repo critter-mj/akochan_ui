@@ -38,21 +38,30 @@ and input random seed (non-negative integer).
     python main.py --tenhou_convlog --year 20XX
 ```
 
-## Dump feature for supervised learning (from converted Tenhou-log)
+## Dump feature for supervised learning
 ```
-    python main.py --dump_feature_tenhou --prefix <prefix_str>
-```
-<prefix_str> is prefix of json filename in tenhou_mjailog (for example 2018, 20180104, 2018010400gm-00a9).
-Note that system.exe from akochan, and converted mjai-log of Tenhou is required.
-When you run with option --update, old output is updated.
-Output files are saved in tenhou_npz directory.
-
-## Dump feature for supervised learning (from own log)
-```
-    python main.py --dump_feature --out_dir <outdir_str> --file_path <filepath_str>
+    python main.py --dump_feature --input_logdir logdir --input_regex log*.json --output_npzdir outdir
 ```
 Note that system.exe from akochan is required.
-Output files are saved in <outdir_str> directory.
+This command assumes that logfiles log001.json, log002.json, ... are in directory logdir.
+Output files are saved in directory outdir.
+
+## Input arguments from text file
+The argument '--argfile xx.txt' is expanded with the contents of xx.txt.
+That is, the command
+```
+    python main.py --dump_feature --input_logdir logdir --input_regex log*.json --output_npzdir outdir
+```
+is equivalent with
+```
+    python main.py --dump_feature --argfile xx.txt --output_npzdir outdir
+```
+when the contents of xx.txt is the following.
+```
+--input_logdir logdir
+--input_regex log*.json
+```
+Note that '--dump_feature' and '--output_npzdir outdir' can be included in xx.txt.
 
 ## Used materials
 

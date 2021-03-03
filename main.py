@@ -1,3 +1,5 @@
+import sys
+import copy
 import json
 import subprocess
 import eel
@@ -310,10 +312,14 @@ def main(args):
         else:
             print("please specify year")
     elif args.dump_feature:
-        input_logdir = "../tenhou_logjson"
-        input_regex = "2017/2017*/*.json"
-        output_npzdir = "tenhou_npz"
-        proc_batch_mjailog(input_logdir, input_regex, output_npzdir, args.update)
+        if args.input_logdir is None:
+            print("please specify input_logdir")
+        elif args.input_regex is None:
+            print("please specify input_regex")
+        elif args.output_npzdir is None:
+            print("please specify output_npzdir")
+        else:
+            proc_batch_mjailog(args.input_logdir, args.input_regex, args.output_npzdir, args.update)
     else:
         eel.init("web")
         eel.start("main.html")
@@ -323,6 +329,18 @@ if __name__ == '__main__':
     parser.add_argument('--tenhou_convlog', action='store_true')
     parser.add_argument('--year')
     parser.add_argument('--dump_feature', action='store_true')
+    parser.add_argument('--input_logdir')
+    parser.add_argument('--input_regex')
+    parser.add_argument('--output_npzdir')
     parser.add_argument('--update', action='store_true')
-    args = parser.parse_args()
+
+    argv = copy.deepcopy(sys.argv)
+    # The following process replaces '--argfile xx.txt' with the contents of xx.txt.
+    for i in range(len(argv) - 1):
+        if argv[i] == '--argfile':
+            with open(argv[i+1], 'r') as f:
+                argv = argv[:i] + f.read().split() + argv[i+2:]
+            break
+
+    args = parser.parse_args(argv[1:])
     main(args)
