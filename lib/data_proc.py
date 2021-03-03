@@ -1,3 +1,4 @@
+import os
 import pathlib
 import glob
 import subprocess
@@ -6,6 +7,12 @@ import joblib
 
 from .util import *
 from .mjtypes import *
+
+def get_output_pathstr(input_logdir, file_name, output_npzdir, action_type):
+    tmp_path = os.path.join(output_npzdir, action_type, file_name[len(input_logdir):].lstrip(os.sep))
+    tmp_dir = os.path.dirname(tmp_path)
+    tmp_name = os.path.splitext(os.path.basename(tmp_path))[0]
+    return os.path.join(tmp_dir, action_type + '_' + tmp_name + '.npz')
 
 class Data_Processor:
     def __init__(self):
@@ -113,71 +120,44 @@ class Data_Processor:
                         self.x_kan.append(x)
                         self.y_kan.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
 
-    def dump_child(self, dir_path, tenhou_id, action_type, X, Y):
+    def dump_child(self, input_logdir, file_name, output_npzdir, action_type, X, Y):
         if 0 < len(Y):
-            out_dir_pathstr = dir_path + "/" + action_type + "/" + tenhou_id[:4] + "/" + tenhou_id[:8]
-            try_mkdir(out_dir_pathstr)
-            np.savez_compressed(out_dir_pathstr + "/" + action_type + "_" + tenhou_id, X, Y)
+            output_pathstr = get_output_pathstr(input_logdir, file_name, output_npzdir, action_type)
+            try_mkdir(os.path.dirname(output_pathstr))
+            np.savez_compressed(output_pathstr, X, Y)
             X.clear()
             Y.clear()
 
-    def dump(self, dir_path, tenhou_id):
-        self.dump_child(dir_path, tenhou_id, "discard", self.x_discard, self.y_discard)
-        self.dump_child(dir_path, tenhou_id, "chi", self.x_chi, self.y_chi)
-        self.dump_child(dir_path, tenhou_id, "pon", self.x_pon, self.y_pon)
-        self.dump_child(dir_path, tenhou_id, "kan", self.x_kan, self.y_kan)
-        #self.dump_child(dir_path, tenhou_id, "daiminkan", self.x_daiminkan, self.y_daiminkan)
-        #self.dump_child(dir_path, tenhou_id, "kakan", self.x_kakan, self.y_kakan)
-        #self.dump_child(dir_path, tenhou_id, "ankan", self.x_ankan, self.y_ankan)
-        self.dump_child(dir_path, tenhou_id, "reach", self.x_reach, self.y_reach)
+    def dump(self, input_logdir, file_name, output_npzdir):
+        self.dump_child(input_logdir, file_name, output_npzdir, "discard", self.x_discard, self.y_discard)
+        self.dump_child(input_logdir, file_name, output_npzdir, "chi", self.x_chi, self.y_chi)
+        self.dump_child(input_logdir, file_name, output_npzdir, "pon", self.x_pon, self.y_pon)
+        self.dump_child(input_logdir, file_name, output_npzdir, "kan", self.x_kan, self.y_kan)
+        self.dump_child(input_logdir, file_name, output_npzdir, "reach", self.x_reach, self.y_reach)
 
-    def dump_normal_child(self, dir_path, name_str, action_type, X, Y):
-        if 0 < len(Y):
-            out_dir_pathstr = dir_path + "/" + action_type + "/" + name_str
-            try_mkdir(out_dir_pathstr)
-            np.savez_compressed(out_dir_pathstr + "/" + action_type + "_" + name_str, X, Y)
-            X.clear()
-            Y.clear()
-
-    def dump_normal(self, dir_path, name_str):
-        self.dump_normal_child(dir_path, name_str, "discard", self.x_discard, self.y_discard) 
-
-def proc_tenhou_mjailog(input_logdir, tenhou_id):
+def proc_mjailog(input_logdir, file_name, output_npzdir):
     dp = Data_Processor()
-    log_path_str = input_logdir + "/" + tenhou_id[:4] + "/" + tenhou_id[:8] + "/" + tenhou_id + ".json"
-    game_record = read_log_json(log_path_str)
-    cmd = "./system.exe legal_action_log_all " + log_path_str
+    game_record = read_log_json(file_name)
+    cmd = "./system.exe legal_action_log_all " + file_name
     c = subprocess.check_output(cmd.split()).decode('utf-8').rstrip()
     legal_actions_all = json.loads(c)
     try:
         dp.process_record(game_record, legal_actions_all)
-        dp.dump("tenhou_npz", tenhou_id)
+        dp.dump(input_logdir, file_name, output_npzdir)
     except AssertionError as e:
-        print('proc_tenhou_mjailog AssertionError:', e)
+        print('proc_mjailog AssertionError:', e)
 
-def proc_batch_tenhou_mjailog(input_logdir, prefix, update):
-    if len(prefix) < 4:
-        print("proc_batch_tenhou_mjailog prefix too short")
-        return
-    target = ""
-    if len(prefix) <= 8:
-        target = input_logdir + "/" + prefix[:4] + "/" + prefix + "*/*.json"
-    else:
-        target = input_logdir + "/" + prefix[:4] + "/" + prefix[:8] + "/" + prefix + "*.json"
+def proc_batch_mjailog(input_logdir, input_regex, output_npzdir, update):
+    file_list = sorted(glob.glob(os.path.join(input_logdir, input_regex)))
 
-    file_list = sorted(glob.glob(target))
-    #for file_name in sorted(file_list):
     def loop_func(file_name):
-        file_name = file_name.replace('\\', '/')
-        tenhou_id = file_name.split('/')[-1].split('.')[0]
-
         if not update:
-            discard_path = pathlib.Path("tenhou_npz/discard/" + tenhou_id[:4] + "/" + tenhou_id[:8] + "/discard_" + tenhou_id + ".npz")
-            if discard_path.is_file():
+            discard_path = get_output_pathstr(input_logdir, file_name, output_npzdir, 'discard')
+            if pathlib.Path(discard_path).is_file():
                 return
+            
+        print("process:", file_name)
+        proc_mjailog(input_logdir, file_name, output_npzdir)
 
-        print("process:", tenhou_id)
-        proc_tenhou_mjailog(input_logdir, tenhou_id)
-     
     joblib.Parallel(n_jobs=6)(joblib.delayed(loop_func)(file_name) for file_name in file_list)
     

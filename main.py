@@ -309,34 +309,11 @@ def main(args):
             proc_year(args.year)
         else:
             print("please specify year")
-    elif args.dump_feature_tenhou:
-        input_logdir = "../tenhou_logjson"
-        if args.tenhou_id != None:
-            proc_tenhou_mjailog(input_logdir, args.tenhou_id)
-        elif args.prefix != None:
-            proc_batch_tenhou_mjailog(input_logdir, args.prefix, args.update)
-        else:
-            print("please specify tenhou_id")
-            return
     elif args.dump_feature:
-        if args.out_dir == None:
-            print("please specify out_dir")
-            return
-
-        out_dir = pathlib.Path(args.out_dir)
-        if not out_dir.is_dir():
-            out_dir.mkdir()
-
-        if args.file_path != None:
-            dp = Data_Processor()
-            game_record = read_log_json(args.file_path)
-            cmd = "./system.exe legal_action_log_all " + args.file_path
-            c = subprocess.check_output(cmd.split()).decode('utf-8').rstrip()
-            legal_actions_all = json.loads(c)
-            dp.process_record(game_record, legal_actions_all)
-            dp.dump_normal(args.out_dir, args.file_path.split('/')[-1].split('.')[0])
-        else:
-            print("please specify a file")
+        input_logdir = "../tenhou_logjson"
+        input_regex = "2017/2017*/*.json"
+        output_npzdir = "tenhou_npz"
+        proc_batch_mjailog(input_logdir, input_regex, output_npzdir, args.update)
     else:
         eel.init("web")
         eel.start("main.html")
@@ -346,11 +323,6 @@ if __name__ == '__main__':
     parser.add_argument('--tenhou_convlog', action='store_true')
     parser.add_argument('--year')
     parser.add_argument('--dump_feature', action='store_true')
-    parser.add_argument('--file_path')
-    parser.add_argument('--out_dir')
-    parser.add_argument('--dump_feature_tenhou', action='store_true')
-    parser.add_argument('--tenhou_id')
-    parser.add_argument('--prefix')
     parser.add_argument('--update', action='store_true')
     args = parser.parse_args()
     main(args)
