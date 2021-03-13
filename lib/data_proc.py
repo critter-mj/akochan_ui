@@ -5,6 +5,8 @@ import subprocess
 import json
 import joblib
 
+import numpy as np
+
 from .util import *
 from .mjtypes import *
 
@@ -160,4 +162,43 @@ def proc_batch_mjailog(input_logdir, input_regex, output_npzdir, update):
         proc_mjailog(input_logdir, file_name, output_npzdir)
 
     joblib.Parallel(n_jobs=6)(joblib.delayed(loop_func)(file_name) for file_name in file_list)
+
+def get_legal_actions_and_feature(current_record):
+    features = [{"others": []} for i in range(4)]
+    if len(current_record) == 0:
+        return None, features
+
+    action = current_record[-1]
+    cmd = "./system.exe legal_action " + json.dumps({'record': current_record}, separators=(',', ':'))
+    legal_actions = subprocess.check_output(cmd.split()).decode('utf-8').rstrip()
+    legal_actions = json.loads(legal_actions)
+
+    game_state = get_game_state_start_kyoku(json.loads(INITIAL_START_KYOKU))
+    for action in current_record:
+        if action["type"] == "start_kyoku":
+            game_state = get_game_state_start_kyoku(action)
+        else:
+            game_state.go_next_state(action)
+
+    if action["type"] == "tsumo" or action["type"] == "chi" or action["type"] == "pon":
+        features[action["actor"]]["discard"] = game_state.to_numpy(action["actor"])
+
+    if action["type"] == "tsumo" or action["type"] == "dahai":
+        for legal_action in legal_actions:
+            if legal_action["type"] in ["chi", "pon"] :
+                x = game_state.to_numpy_fuuro(legal_action["actor"], legal_action["pai"], legal_action["consumed"])
+                features[legal_action["actor"]]["others"].append((legal_action, x))
+            elif legal_action["type"] == "reach":
+                x = game_state.to_numpy(legal_action["actor"])
+                features[legal_action["actor"]]["others"].append((legal_action, x))
+            elif legal_action["type"] in ["kakan", "ankan", "daiminkan"]:
+                if legal_action["type"] == "daiminkan":
+                    kan_type = 0
+                elif legal_action["type"] == "kakan":
+                    kan_type = 1
+                else:
+                    kan_type = 2
+                x = game_state.to_numpy_kan(kan_type, legal_action["actor"], legal_action["consumed"])
+                features[legal_action["actor"]]["others"].append((legal_action, x))
+    return legal_actions, features
     
