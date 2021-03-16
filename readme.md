@@ -46,6 +46,14 @@ Note that system.exe from akochan is required.
 This command assumes that logfiles log001.json, log002.json, ... are in directory logdir.
 Output files are saved in directory outdir.
 
+## Predict moves from supervised model
+```
+    python main.py --check_model --log_line <log_line_integer>
+```
+Note that system.exe from akochan is required.
+This command predict moves at log_line_integer of log/haifu_log_1001_0.json.
+Currently only dahai model is prepared.
+
 ## Input arguments from text file
 The argument '--argfile xx.txt' is expanded with the contents of xx.txt.
 That is, the command

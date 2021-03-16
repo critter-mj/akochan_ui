@@ -60,16 +60,16 @@ class DiscardNet(nn.Module):
 class Supervised_AI():
     def __init__(self):
         self.player_ids = [0, 1, 2, 3]
-        self.dahai_model_path = 'supervised_model/discard_model_cpu_state_dict.pth'
+        self.dahai_model_path = 'supervised_model/train_tmp_cpu_state_dict.pth'
         self.dahai_model = None
 
     def predict_discard(self, legal_actions, feature):
         if self.dahai_model is None:
-            self.dahai_model = DiscardNet(560, 256, 50)
+            #self.dahai_model = DiscardNet(560, 256, 50)
+            self.dahai_model = DiscardNet(560, 128, 15)
             self.dahai_model.load_state_dict(torch.load(self.dahai_model_path))
 
         predict = forward_one(self.dahai_model, feature)
-        print(predict)
         ret = []
         for action in legal_actions:
             if action['type'] == 'dahai':
