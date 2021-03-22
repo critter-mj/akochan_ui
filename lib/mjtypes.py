@@ -575,7 +575,17 @@ class Game_State:
         ps2 = np.concatenate([ps, self.to_numpy_bakaze(), self.to_numpy_kyoku(), self.to_numpy_honba(), self.to_numpy_kyotaku(), self.to_numpy_dora()])
         return ps2
 
-    def to_numpy_kan(self, kan_type, my_pid, consumed_hai):
+    def to_numpy_kan(self, action_type, my_pid, consumed_hai):
+        def get_kan_type():
+            if action_type == "daiminkan":
+                return 0
+            elif action_type == "kakan":
+                return 1
+            elif action_type == "ankan":
+                return 2
+            else:
+                assert False, "to_numpy_kan error"
+                return -1
         # my_pid is 0,1,2,3
         ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(i == 0) for i in range(4)])
         #ps = np.concatenate([self.player_state[(my_pid + i)%4].to_numpy(True) for i in range(4)])
@@ -584,10 +594,12 @@ class Game_State:
             ret[i][get_hai34(hai_str_to_int(consumed_hai[0]))] = 1
         #print(ret)
         kan_t = np.zeros((3,34), dtype=np.int)
+        kan_type = get_kan_type()
         for i in range(34):
             kan_t[kan_type][i] = 1
         ps = np.concatenate([ps, ret, kan_t])
         ps2 = np.concatenate([ps, self.to_numpy_bakaze(), self.to_numpy_kyoku(), self.to_numpy_honba(), self.to_numpy_kyotaku(), self.to_numpy_dora()])
+        return ps2
 
 def get_game_state_start_kyoku(action_json_dict):
     assert action_json_dict["type"] == "start_kyoku", "get_game_state_start_kyoku_error"

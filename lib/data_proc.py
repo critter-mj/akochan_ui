@@ -112,13 +112,7 @@ class Data_Processor:
                         self.x_reach.append(x)
                         self.y_reach.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
                     if  legal_action["type"] == "kakan" or legal_action["type"] == "ankan" or legal_action["type"] == "daiminkan":
-                        if legal_action["type"] == "daiminkan":
-                            kan_type = 0
-                        elif legal_action["type"] == "kakan":
-                            kan_type = 1
-                        else:
-                            kan_type = 2
-                        x = game_state.to_numpy_kan(kan_type, legal_action["actor"], legal_action["consumed"])
+                        x = game_state.to_numpy_kan(legal_action["type"], legal_action["actor"], legal_action["consumed"])
                         self.x_kan.append(x)
                         self.y_kan.append(np.array([1,0]) if legal_action == game_record[i+1] else np.array([0,1]))
 
