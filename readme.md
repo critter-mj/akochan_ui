@@ -46,6 +46,18 @@ Note that system.exe from akochan is required.
 This command assumes that logfiles log001.json, log002.json, ... are in directory logdir.
 Output files are saved in directory outdir.
 
+## Check supervised model
+```
+    python main.py --check_model --log_line XX
+```
+Supervised model shows probability of each action at line XX(1-indexed) of log/haifu_log_1001_0.json.
+
+```
+    python main.py --check_model --log_line XX --player_id P
+```
+A player P(one of 0,1,2,3), chooses action at line XX of log/haifu_log_1001_0.json.
+
+
 ## Input arguments from text file
 The argument '--argfile xx.txt' is expanded with the contents of xx.txt.
 That is, the command
