@@ -324,11 +324,19 @@ def main(args):
     elif args.check_model:
         game_record = read_log_json('log/haifu_log_1001_0.json')
         current_record = game_record[:args.log_line]
-        ai = ml_modules.Supervised_AI()
-        ret = ai.run(current_record)
-        for pid in range(4):
-            for action in ret[pid]:
-                print(action)
+        ai = ml_modules.Supervised_AI(args.player_id)
+
+        if args.player_id == -1:
+            ret = ai.run(current_record)
+            for pid in range(4):
+                for action in ret[pid]:
+                    print(action)
+        else:
+            current_record = [mask_action(j, args.player_id) for j in current_record]
+            current_record[0]['player_id'] = args.player_id
+            ret = ai.choose_action(current_record)
+            print(ret)
+
     else:
         eel.init("web")
         eel.start("main.html")
@@ -344,6 +352,7 @@ if __name__ == '__main__':
     parser.add_argument('--update', action='store_true')
     parser.add_argument('--check_model', action='store_true')
     parser.add_argument('--log_line', type=int, default=0)
+    parser.add_argument('--player_id', type=int, default=-1, choices=[-1, 0, 1, 2, 3])
 
     argv = copy.deepcopy(sys.argv)
     # The following process replaces '--argfile xx.txt' with the contents of xx.txt.
