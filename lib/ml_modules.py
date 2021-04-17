@@ -142,9 +142,9 @@ class Supervised_AI():
                 ret[pid].extend(self.predict_discard(filter(lambda a: a['type'] == 'dahai', legal_actions), feature[pid]['dahai']))
             if 'reach' in feature[pid]:
                 ret[pid].append({'type': 'reach', 'actor': pid, 'prob': self.predict_others('reach', feature[pid]['reach'])})
-            for (action, feature) in feature[pid]['others']:
+            for (action, f) in feature[pid]['others']:
                 a = copy.deepcopy(action)
-                a['prob'] = self.predict_others(a['type'], feature)
+                a['prob'] = self.predict_others(a['type'], f)
                 ret[pid].append(a)
             ret[pid].extend(filter(
                 lambda a: a['actor'] == pid and a['type'] not in ['dahai', 'reach', 'chi', 'pon', 'ankan', 'daiminkan', 'kakan'],
