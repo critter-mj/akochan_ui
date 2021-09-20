@@ -101,6 +101,9 @@ class Supervised_AI():
         self.model_paths['chi'] = 'supervised_model/chi_model_cpu_state_dict.pth'
         self.model_paths['pon'] = 'supervised_model/pon_model_cpu_state_dict.pth'
         self.model_paths['kan'] = 'supervised_model/kan_model_cpu_state_dict.pth'
+        self.model_paths['daiminkan'] = 'supervised_model/kan_model_cpu_state_dict.pth'
+        self.model_paths['ankan'] = 'supervised_model/kan_model_cpu_state_dict.pth'
+        self.model_paths['kakan'] = 'supervised_model/kan_model_cpu_state_dict.pth'
         self.model_inchannels = {'reach': 560, 'chi': 564, 'pon': 564, 'ankan': 567, 'daiminkan': 567, 'kakan': 567}
 
     def player_ids(self):
